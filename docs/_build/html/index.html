@@ -1,0 +1,254 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to Python CiviCRM’s documentation! &mdash; Python CiviCRM 0.1 documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Python CiviCRM 0.1 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">Python CiviCRM 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-python-civicrm-s-documentation">
+<h1>Welcome to Python CiviCRM&#8217;s documentation!<a class="headerlink" href="#welcome-to-python-civicrm-s-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+<span class="target" id="module-pythoncivicrm"></span><div class="section" id="python-civicrm">
+<h2>Python CiviCRM<a class="headerlink" href="#python-civicrm" title="Permalink to this headline">¶</a></h2>
+<p>This is a module for interacting with the CiviCRM REST API Version 3.</p>
+<p>It&#8217;s use should be fairly straight forward, at least if you have basic 
+familiarity with the API documentation.</p>
+<p>Everything is implemented in the CiviCRM class. You need, at a minimum
+to pass a URL, and the your site and API keys when instantiating your 
+object.</p>
+<p>This class has methods that correspond to nearly all the underlying 
+actions provided by the REST API, as well as implementing a few more of 
+its own. Some of these are more convenient and/or simpler versions 
+of the actions. Others provide for more complex or specific tasks e.g. 
+adding a contact. The eventual aim is to match the functionality provided
+in the PHP API.</p>
+<p>There are some differences in how things are implemented, in particular 
+with how things are returned. See <a class="reference internal" href="#things-to-note"><em>Things to note</em></a>.</p>
+<div class="section" id="usage">
+<h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
+<p>Use example for a basic search:</p>
+<div class="highlight-python"><pre>url = 'www.example.org/path/to/civi/codebase/civicrm/extern/rest.php'
+site_key ='your site key'
+api_key ='your api key'
+civicrm = CiviCRM(url, site_key, api_key)
+
+search_terms = {'city' : 'Gotham City', 'contact_type' : 'Individual'}
+search results = civicrm.get('Contact', search_terms}</pre>
+</div>
+</div>
+<div class="section" id="things-to-note">
+<span id="id1"></span><h3>Things to note<a class="headerlink" href="#things-to-note" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Unless otherwise specified methods expect to take a dictionary of values, rather than kwargs**, this is params in the parameters, when used.</li>
+<li>Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.</li>
+<li>The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves &#8211; typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().</li>
+<li>Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields &amp; getoptions that return  a dictionary with real keys.</li>
+<li>the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.</li>
+</ul>
+<dl class="class">
+<dt id="pythoncivicrm.CiviCRM">
+<em class="property">class </em><tt class="descclassname">pythoncivicrm.</tt><tt class="descname">CiviCRM</tt><big>(</big><em>url</em>, <em>site_key</em>, <em>api_key</em>, <em>use_ssl=True</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM" title="Permalink to this definition">¶</a></dt>
+<dd><p>make calls against the civicrm api</p>
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.create">
+<tt class="descname">create</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of create action</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.delete">
+<tt class="descname">delete</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>skip_undelete=False</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a record. Set skip_undelete to True, to 
+permanently delete a record for cases  where there
+is a &#8216;recycle bin&#8217; e.g. contacts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.doaction">
+<tt class="descname">doaction</tt><big>(</big><em>entity</em>, <em>action</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.doaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>There are other actions for some entities, but
+these are undocumented?. This allows you to utilise
+these. Use with caution.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.get">
+<tt class="descname">get</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of get action</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.getcount">
+<tt class="descname">getcount</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getcount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of qualifying records.
+Mayt not be accurate for values &gt; 25. (will return 25)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.getfields">
+<tt class="descname">getfields</tt><big>(</big><em>entity</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getfields" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of fields for entity, where
+keys (and key[&#8216;name&#8217;]) are names of field and the value
+is a dictionary describing that field</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.getoptions">
+<tt class="descname">getoptions</tt><big>(</big><em>entity</em>, <em>field</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getoptions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a dictionary of options for fields
+as key/value pairs. Typically identical to each other.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.getsingle">
+<tt class="descname">getsingle</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getsingle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of getsingle action</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.getvalue">
+<tt class="descname">getvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of getvalue action</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.search">
+<tt class="descname">search</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em>, <em>limit=None</em>, <em>offset=None</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search entity for field = value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.searchsingle">
+<tt class="descname">searchsingle</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchsingle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search entity for field = value, return single result</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.searchvalue">
+<tt class="descname">searchvalue</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em>, <em>returnfield</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search entity for field = value, 
+return single result with single field</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.setvalue">
+<tt class="descname">setvalue</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>field</em>, <em>value</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.setvalue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates a single field.
+This is not well documented, use at own risk.
+It appears it takes an id and single field and value</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.update">
+<tt class="descname">update</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a record</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome to Python CiviCRM&#8217;s documentation!</a><ul>
+<li><a class="reference internal" href="#python-civicrm">Python CiviCRM</a><ul>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#things-to-note">Things to note</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">Python CiviCRM 0.1 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Paul Munday.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
