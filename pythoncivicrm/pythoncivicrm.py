@@ -114,12 +114,13 @@ class CiviCRM:
     
     def get(self, entity, params=None, **kwargs):
         """Simple implementation of get action.
+        Supply search terms in a dictionary called params
         Pass limit and offset for a subset of the results
         (or pass them in  params). Other options can also be passed
         as key=value pairs (options as defined here:
         http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory. 
         """
-        params = add_options(params, limit=limit, offset=offset)
+        params = add_options(params, kwargs)
         return self._get('get', entity, parameters=params)
 
     def getsingle(self, entity, params):
@@ -211,8 +212,17 @@ class CiviCRM:
         return self._get(action, entity, params)
 
 
-def add_options(params, **kwargs):
-    """adds limit and offset etc in form required by REST API"""
+def add_options(params, kwlist=None, **kwargs):
+    """adds limit and offset etc in form required by REST API
+    Takes key=value pairs and/or a dictionary(kwlist) 
+    in addition to a parameter dictionary to extend"""
+    if kwlist:
+        for key, value in kwlist.iteritems():
+            if value:
+                option = "options[%s]" % key
+                params.update({option : value})
+        return params
+
     for key, value in kwargs.iteritems():
         if value:
             option = "options[%s]" % key
