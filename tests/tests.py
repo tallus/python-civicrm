@@ -8,7 +8,8 @@ class MyTests(unittest.TestCase):
         # pylint: disable=R0904
 
     def setUp(self):
-        url = '192.168.1.124/drupal7/sites/all/modules/civicrm/extern/rest.php'
+        ip='192.168.56.101' # was '192.168.1.124'
+        url = "%s/drupal7/sites/all/modules/civicrm/extern/rest.php" % ip
         site_key = '371cfadc834d2784a35e4f4ab20c1316'
         api_key = 'b734df56706432bb514ed737465424c3'
         self.cc = CiviCRM(url, site_key, api_key, use_ssl=False)
@@ -48,7 +49,7 @@ class MyTests(unittest.TestCase):
 
     def test_get_with_limit_offset(self):
         results = self.cc.get('Contact', {'contact_type': 'Individual',
-            'Country' : 'United States'}, 2,0)
+            'Country' : 'United States'}, limit=2,offset=0)
         result = results[0]
         self.assertEquals(result['sort_name'], 'Terry, Brittney')
         self.assertEquals(len(results), 2)
