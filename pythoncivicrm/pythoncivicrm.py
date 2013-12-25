@@ -37,21 +37,22 @@ Use example for a basic search::
 
 
     search_terms = {'city' : 'Gotham City', 'contact_type' : 'Individual'}
-    search results = civicrm.get('Contact', search_terms}
+    search results = civicrm.get('Contact', search_terms)
+    first_10_search results = civicrm.get('Contact', search_terms, limit=10)
 
 .. _things-to-note:
 
 Things to note
 --------------
 
-* Unless otherwise specified methods expect to take a dictionary of values, rather than kwargs**, this is params in the parameters, when used.
+* Unless otherwise specified methods expect to take a dictionary of values, rather than kwargs**, this is params in the parameters, when used. 
+* Except for options as defined in the CiviCRM API <a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">here</a>.
 * Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.
 * The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
 * the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
 """
 
-#TODO document options and how theyt may be passed
 
 from __future__ import absolute_import, print_function, unicode_literals
 
@@ -144,10 +145,6 @@ class CiviCRM:
         params = kwargs
         params = add_options(params, limit=limit, offset=offset)
         return self._get('get', entity, parameters=params)
-        
-        
-        return self._get('get', entity, parameters=params)
-                    
 
     def searchsingle(self, entity, field, value):
         """Search entity for field = value, return single result"""
