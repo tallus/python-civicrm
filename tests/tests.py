@@ -21,7 +21,7 @@ class MyTests(unittest.TestCase):
         pass
          
     def test_add_options(self):
-        results = add_options({}, limit=1,offset=0)
+        results = _add_options({}, limit=1,offset=0)
         expected = {u'options[limit]' : 1, u'options[offset]' : 0}
         self.assertEquals(expected['options[limit]'], 1)
     
