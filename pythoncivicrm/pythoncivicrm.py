@@ -121,7 +121,7 @@ class CiviCRM:
         as key=value pairs (options as defined here:
         http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory. 
         """
-        params = add_options(params, kwargs)
+        params = _add_options(params, kwargs)
         return self._get('get', entity, parameters=params)
 
     def getsingle(self, entity, params):
@@ -143,7 +143,7 @@ class CiviCRM:
         """Search entity for field = value."""
         #TODO support passing of option in Dict
         params = kwargs
-        params = add_options(params, limit=limit, offset=offset)
+        params = _add_options(params, limit=limit, offset=offset)
         return self._get('get', entity, parameters=params)
 
     def searchsingle(self, entity, field, value):
@@ -209,7 +209,7 @@ class CiviCRM:
         return self._get(action, entity, params)
 
 
-def add_options(params, kwlist=None, **kwargs):
+def _add_options(params, kwlist=None, **kwargs):
     """adds limit and offset etc in form required by REST API
     Takes key=value pairs and/or a dictionary(kwlist) 
     in addition to a parameter dictionary to extend"""
