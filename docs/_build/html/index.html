@@ -68,6 +68,7 @@ adding a contact. The eventual aim is to match the functionality provided
 in the PHP API.</p>
 <p>There are some differences in how things are implemented, in particular 
 with how things are returned. See <a class="reference internal" href="#things-to-note"><em>Things to note</em></a>.</p>
+<p>A CivicrmError will be raised for anything other than a 200 respose e.g. 404</p>
 <div class="section" id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
 <p>Use example for a basic search:</p>
@@ -76,14 +77,17 @@ site_key ='your site key'
 api_key ='your api key'
 civicrm = CiviCRM(url, site_key, api_key)
 
+
 search_terms = {'city' : 'Gotham City', 'contact_type' : 'Individual'}
-search results = civicrm.get('Contact', search_terms}</pre>
+search results = civicrm.get('Contact', search_terms)
+first_10_search results = civicrm.get('Contact', search_terms, limit=10)</pre>
 </div>
 </div>
 <div class="section" id="things-to-note">
 <span id="id1"></span><h3>Things to note<a class="headerlink" href="#things-to-note" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
 <li>Unless otherwise specified methods expect to take a dictionary of values, rather than kwargs**, this is params in the parameters, when used.</li>
+<li>Except for options as defined in the CiviCRM API &lt;a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters&#8221;&gt;here&lt;/a&gt;.</li>
 <li>Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.</li>
 <li>The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves &#8211; typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().</li>
 <li>Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields &amp; getoptions that return  a dictionary with real keys.</li>
@@ -117,8 +121,13 @@ these. Use with caution.</p>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.get">
-<tt class="descname">get</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.get" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple implementation of get action</p>
+<tt class="descname">get</tt><big>(</big><em>entity</em>, <em>params=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of get action.
+Supply search terms in a dictionary called params
+Pass limit and offset for a subset of the results
+(or pass them in  params). Other options can also be passed
+as key=value pairs (options as defined here:
+<a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters</a> e.g. match, match mandatory.</p>
 </dd></dl>
 
 <dl class="method">
@@ -152,13 +161,16 @@ as key/value pairs. Typically identical to each other.</p>
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.getvalue">
 <tt class="descname">getvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getvalue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple implementation of getvalue action</p>
+<dd><p>Simple implementation of getvalue action.
+Will only return one field and expects only one result,
+as per get single.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.search">
-<tt class="descname">search</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em>, <em>limit=None</em>, <em>offset=None</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search entity for field = value</p>
+<tt class="descname">search</tt><big>(</big><em>entity</em>, <em>limit=None</em>, <em>offset=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Like get but using key=value rather than passing a dictionary.
+Pass limit and offset for a subset of the results.</p>
 </dd></dl>
 
 <dl class="method">
@@ -188,6 +200,14 @@ It appears it takes an id and single field and value</p>
 <dd><p>Update a record</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="pythoncivicrm.add_options">
+<tt class="descclassname">pythoncivicrm.</tt><tt class="descname">add_options</tt><big>(</big><em>params</em>, <em>kwlist=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.add_options" title="Permalink to this definition">¶</a></dt>
+<dd><p>adds limit and offset etc in form required by REST API
+Takes key=value pairs and/or a dictionary(kwlist) 
+in addition to a parameter dictionary to extend</p>
 </dd></dl>
 
 </div>
