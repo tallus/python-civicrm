@@ -91,6 +91,7 @@ first_10_search results = civicrm.get('Contact', search_terms, limit=10)</pre>
 <li>Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.</li>
 <li>The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves &#8211; typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().</li>
 <li>Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields &amp; getoptions that return  a dictionary with real keys.</li>
+<li>results are unicode</li>
 <li>the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.</li>
 </ul>
 <dl class="class">
@@ -162,8 +163,8 @@ as key/value pairs. Typically identical to each other.</p>
 <dt id="pythoncivicrm.CiviCRM.getvalue">
 <tt class="descname">getvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getvalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple implementation of getvalue action.
-Will only return one field and expects only one result,
-as per get single.</p>
+Will only return one field as unicodestring  
+and expects only one result, as per get single.</p>
 </dd></dl>
 
 <dl class="method">
@@ -175,15 +176,15 @@ Pass limit and offset for a subset of the results.</p>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.searchsingle">
-<tt class="descname">searchsingle</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchsingle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search entity for field = value, return single result</p>
+<tt class="descname">searchsingle</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchsingle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search entity for field=value, return single result</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.searchvalue">
-<tt class="descname">searchvalue</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em>, <em>returnfield</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchvalue" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">searchvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchvalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Search entity for field = value, 
-return single result with single field</p>
+return single result with single field as unicode string</p>
 </dd></dl>
 
 <dl class="method">
