@@ -70,10 +70,28 @@ class MyTests(unittest.TestCase):
         self.assertRaises(CivicrmError, self.cc.getsingle, 
             'Contact', {'Country' : 'United States'})
 
+    def test_getvalue(self):
+        results = self.cc.getvalue('Contact', 'sort_name', {'contact_id': 2})
+        self.assertEquals(type(results), unicode)
+        self.assertEquals(results, 'Terry, Brittney')
+        
+    def test_getvalue_multiple_results(self):
+        self.assertRaises(CivicrmError, self.cc.getvalue, 
+            'Contact', 'sort_name', {'Country' : 'United States'})
+    
     def test_search(self):
         results = self.cc.search('Contact', contact_id=2)
         result = results[0]
         self.assertEquals(result['sort_name'], 'Terry, Brittney')
+
+    def test_searchsingle(self):
+        results = self.cc.searchsingle('Contact', contact_id=2)
+        self.assertEquals(results['sort_name'], 'Terry, Brittney')
+
+    def test_searchvalue(self):
+        results = self.cc.searchvalue('Contact', 'sort_name', contact_id=2)
+        self.assertEquals(type(results), unicode)
+        self.assertEquals(results, 'Terry, Brittney')
 
 if __name__ == '__main__':
     pass
