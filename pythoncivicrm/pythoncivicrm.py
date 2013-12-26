@@ -50,7 +50,7 @@ Things to note
 * Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.
 * The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
-* results are unicode
+* Results are unicode
 * the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
 """
 
