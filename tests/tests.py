@@ -1,5 +1,5 @@
 import unittest
-from pythoncivicrm.pythoncivicrm import add_options
+from pythoncivicrm.pythoncivicrm import _add_options
 from pythoncivicrm.pythoncivicrm import CiviCRM
 from pythoncivicrm.pythoncivicrm import CivicrmError
 
@@ -26,7 +26,7 @@ class MyTests(unittest.TestCase):
         self.assertEquals(expected['options[limit]'], 1)
     
     def test_add_single_option(self):
-        results = add_options({}, limit=1)
+        results = _add_options({}, limit=1)
         self.assertEquals(len(results), 1)
 
     def test__get(self):
