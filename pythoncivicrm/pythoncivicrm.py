@@ -50,6 +50,7 @@ Things to note
 * Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.
 * The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
+* results are unicode
 * the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
 """
 
@@ -109,8 +110,10 @@ class CiviCRM:
             raise CivicrmError(results['error_message'])
         if 'values' in results:
             return results['values']
+        elif 'result' in results:
+            return results['result']
         else:
-           return results
+            return results
 
     
     def get(self, entity, params=None, **kwargs):
@@ -122,19 +125,21 @@ class CiviCRM:
         http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory. 
         """
         params = _add_options(params, kwargs)
-        return self._get('get', entity, parameters=params)
+        return self._get('get', entity, params)
 
     def getsingle(self, entity, params):
         """Simple implementation of getsingle action"""
-        return self._get('getsingle', entity, parameters=params)
+        # TODO OPTIONS?
+        return self._get('getsingle', entity, params)
         
 
     def getvalue(self, entity, returnfield, params):
         """Simple implementation of getvalue action.
-        Will only return one field and expects only one result,
-        as per get single."""
-        return self._get('getvalue', entity, 
-                parameters = params.update({'return' : returnfield}))
+        Will only return one field as unicodestring  
+        and expects only one result, as per get single."""
+        # TODO OPTIONS?
+        params.update({'return' : returnfield})
+        return self._get('getvalue', entity, params)
         
 
     def search(self, entity, limit=None, offset=None, **kwargs):
@@ -144,25 +149,29 @@ class CiviCRM:
         #TODO support passing of option in Dict
         params = kwargs
         params = _add_options(params, limit=limit, offset=offset)
-        return self._get('get', entity, parameters=params)
+        return self._get('get', entity, params)
 
-    def searchsingle(self, entity, field, value):
-        """Search entity for field = value, return single result"""
-        return self._get('getsingle', entity, parameters={field :value})
+    def searchsingle(self, entity, **kwargs):
+        """Search entity for field=value, return single result"""
+        # TODO OPTIONS?
+        return self._get('getsingle', entity, kwargs)
         
 
-    def searchvalue(self, entity, field, value, returnfield):
+    def searchvalue(self, entity, returnfield, **kwargs):
         """Search entity for field = value, 
-        return single result with single field"""
-        return self._get('getvalue', entity, 
-                parameters={field :value, 'return' : returnfield})
+        return single result with single field as unicode string"""
+        # TODO OPTIONS?
+        kwargs.update({'return' : returnfield})
+        return self._get('getvalue', entity, kwargs)
 
     def create(self, entity, params):
         """Simple implementation of create action"""
-        return self._get('create', entity, parameters=params)
+        # TODO OPTIONS?
+        return self._get('create', entity, params)
         
     def update(self, entity, db_id, params):
         """Update a record"""
+        # TODO OPTIONS?
         # TODO does this work? check against test install 
         return self.create(entity, params.update({'id' : db_id}))
         
@@ -172,6 +181,7 @@ class CiviCRM:
         This is not well documented, use at own risk.
         It appears it takes an id and single field and value
        """
+        # TODO OPTIONS?
         return self._get('setvalue', entity, 
                 parameters={'id' :db_id, 'field' : field, 'value' : value})
         
@@ -179,16 +189,17 @@ class CiviCRM:
         """Delete a record. Set skip_undelete to True, to 
         permanently delete a record for cases  where there
         is a 'recycle bin' e.g. contacts"""
+        # TODO OPTIONS?
         if skip_undelete is True:
             params = {'id' : db_id, 'skip_undelete': 1}
         else:
             params = {'id' : db_id}
-        return self._get('delete', entity, parameters=params)
+        return self._get('delete', entity, params)
 
     def getcount(self, entity, params):
         """Returns the number of qualifying records.
         Mayt not be accurate for values > 25. (will return 25)"""
-        return self._get('getcount', entity, parameters=params)
+        return self._get('getcount', entity, params)
 
     def getfields(self, entity):
         """Returns a dictionary of fields for entity, where
