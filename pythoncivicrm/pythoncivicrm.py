@@ -51,6 +51,7 @@ Things to note
 * The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
 * Results are unicode
+* Most actions returns the (updated) record in question, others a count e.g. delete
 * the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
 """
 
@@ -104,8 +105,8 @@ class CiviCRM:
         return self._check_results(results)
 
     def _construct_request(self, action, entity, parameters):
-        '''Takes parameters, action, entity,
-        returns url strings and payload(sanitized params)'''
+        """Takes parameters, action, entity,
+        returns url strings and payload(sanitized params)"""
         if self.use_ssl:
             start = 'https://'
         else:
@@ -128,7 +129,7 @@ class CiviCRM:
         return urlstring, payload
 
     def _check_results(self, results):
-        '''returns relevant part of results or raise error'''
+        """returns relevant part of results or raise error"""
         if 'is_error' in results and results['is_error'] == 1:
             raise CivicrmError(results['error_message'])
         if 'values' in results:
@@ -193,18 +194,23 @@ class CiviCRM:
         return self._post('create', entity, params)
         
     def update(self, entity, db_id, params):
-        """Update a record"""
+        """Update a record. An id must be supplied"""
         # TODO OPTIONS?
-        # TODO does this work? check against test install 
         params.update({'id' : db_id})
         return self.create(entity, params)
-        
+
+    def updatevalues(self, entity, db_id, **kwargs):
+        """update a record using key=value pairs.
+        An id must be supplied."""
+        params = kwargs
+        params.update({'id' : db_id})
+        return self.create(entity, params)
                 
     def setvalue(self, entity, db_id, field, value):
         """Updates a single field.
         This is not well documented, use at own risk.
-        It appears it takes an id and single field and value
-       """
+        Takes an id and single field and value, 
+        returns a dictionary with the updated field and record."""
         # TODO OPTIONS?
         return self._post('setvalue', entity, 
                 parameters={'id' :db_id, 'field' : field, 'value' : value})
@@ -212,7 +218,8 @@ class CiviCRM:
     def delete(self, entity, db_id, skip_undelete = False):
         """Delete a record. Set skip_undelete to True, to 
         permanently delete a record for cases  where there
-        is a 'recycle bin' e.g. contacts"""
+        is a 'recycle bin' e.g. contacts
+        Returns number of deleted records"""
         # TODO OPTIONS?
         if skip_undelete is True:
             params = {'id' : db_id, 'skip_undelete': 1}
