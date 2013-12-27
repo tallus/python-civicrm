@@ -123,6 +123,15 @@ class MyTests(unittest.TestCase):
         results = self.cc.delete('Contact', cresults[0]['id'], True)
         self.assertEquals(results, 1)
 
+    def test_update(self):
+        cresults = self.cc.create('Contact', 
+                {'contact_type' : 'individual', 'display_name' : 'bar, foo'})
+        myid = cresults[0]['id']
+        results = self.cc.update('Contact', myid,
+                {'display_name' : 'foo, bar'})
+        self.cc.delete('Contact', myid, True)
+        self.assertEquals(results[0]['display_name'], 'foo, bar')
+
 if __name__ == '__main__':
     pass
     
