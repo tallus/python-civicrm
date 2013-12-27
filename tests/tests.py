@@ -125,12 +125,24 @@ class MyTests(unittest.TestCase):
 
     def test_update(self):
         cresults = self.cc.create('Contact', 
-                {'contact_type' : 'individual', 'display_name' : 'bar, foo'})
+                {'contact_type' : 'individual', 
+                 'display_name' : 'bar, foo'})
         myid = cresults[0]['id']
         results = self.cc.update('Contact', myid,
                 {'display_name' : 'foo, bar'})
         self.cc.delete('Contact', myid, True)
         self.assertEquals(results[0]['display_name'], 'foo, bar')
+
+    def test_setvalue(self):
+        cresults = self.cc.create('Contact', 
+                {'contact_type' : 'individual', 
+                 'display_name' : 'bar, foo'})
+        myid = cresults[0]['id']
+        results = self.cc.setvalue('Contact', myid, 
+                'display_name', 'foo, bar')
+        self.cc.delete('Contact', myid, True)
+        self.assertEquals(results['display_name'], 'foo, bar')
+
 
 if __name__ == '__main__':
     pass
