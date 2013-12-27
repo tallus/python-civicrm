@@ -29,10 +29,28 @@ class MyTests(unittest.TestCase):
         results = _add_options({}, limit=1)
         self.assertEquals(len(results), 1)
 
+    def test__construct_request(self):
+        url, payload = self.cc._construct_request('get', 'Contact', 
+                {'json' : 0, 'contact_id': 2})
+        self.assertEquals(payload['json'], 1)
+        self.assertEquals(payload['contact_id'], 2)
+
+    def test__check_results(self):
+        results = self.cc._check_results({'is_error' : 0, 'result' : 1})
+        self.assertEquals(results, 1)
+
+    def test__check_results_raises_exception(self):
+        self.assertRaises(CivicrmError, self.cc._check_results,
+                {'is_error' : 1, 'error_message' : 'test', 'result' : 1})
+
     def test__get(self):
         results = self.cc._get('get', 'Contact')
         self.assertGreater(len(results), 1)
 
+    def test__post(self):
+        results = self.cc._post('get', 'Contact')
+        self.assertGreater(len(results), 1)
+    
     def test_get(self):
         results = self.cc.get('Contact')
         self.assertGreater(len(results), 1)
@@ -92,6 +110,18 @@ class MyTests(unittest.TestCase):
         results = self.cc.searchvalue('Contact', 'sort_name', contact_id=2)
         self.assertEquals(type(results), unicode)
         self.assertEquals(results, 'Terry, Brittney')
+
+    def test_create(self):
+        results = self.cc.create('Contact', 
+                {'contact_type' : 'individual', 'display_name' : 'bar, foo'})
+        self.cc.delete('Contact', results[0]['id'], True)
+        self.assertEquals(results[0]['display_name'], 'bar, foo')
+    
+    def test_delete(self):
+        cresults = self.cc.create('Contact', 
+                {'contact_type' : 'individual', 'display_name' : 'bar, foo'})
+        results = self.cc.delete('Contact', cresults[0]['id'], True)
+        self.assertEquals(results, 1)
 
 if __name__ == '__main__':
     pass
