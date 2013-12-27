@@ -83,6 +83,29 @@ class CiviCRM:
         """Internal method to make api calls"""
         if not parameters:
             parameters = {}
+        urlstring, payload = self._construct_request(action, entity, parameters)
+        api_call = requests.get(urlstring, params=payload)
+        if api_call.status_code != 200:
+                raise CivicrmError('request to %s failed with status code %s'
+                        % (urlstring, api_call.status_code))
+        results =  json.loads(api_call.content)
+        return self._check_results(results)
+
+    def _post(self, action, entity, parameters=None):
+        """Internal method to make api calls"""
+        if not parameters:
+            parameters = {}
+        urlstring, payload = self._construct_request(action, entity, parameters)
+        api_call = requests.post(urlstring, params=payload)
+        if api_call.status_code != 200:
+                raise CivicrmError('request to %s failed with status code %s'
+                        % (urlstring, api_call.status_code))
+        results =  json.loads(api_call.content)
+        return self._check_results(results)
+
+    def _construct_request(self, action, entity, parameters):
+        '''Takes parameters, action, entity,
+        returns url strings and payload(sanitized params)'''
         if self.use_ssl:
             start = 'https://'
         else:
@@ -96,16 +119,16 @@ class CiviCRM:
                 'entity' : entity,
                 'action' : action
                 }
-        # these should all be set explicitly
+        # these should all be set explicitly so remove from parameters
         for badparam in ['site_key', 'api_key', 'entity', 'action', 
                 'json', 'sequential']:
             parameters.pop(badparam, None)
+        # add in parameters
         payload.update(parameters)
-        api_call = requests.get(urlstring, params=payload)
-        if api_call.status_code != 200:
-                raise CivicrmError('request to %s failed with status code %s'
-                        % (urlstring, api_call.status_code))
-        results =  json.loads(api_call.content)
+        return urlstring, payload
+
+    def _check_results(self, results):
+        '''returns relevant part of results or raise error'''
         if 'is_error' in results and results['is_error'] == 1:
             raise CivicrmError(results['error_message'])
         if 'values' in results:
@@ -115,7 +138,7 @@ class CiviCRM:
         else:
             return results
 
-    
+   
     def get(self, entity, params=None, **kwargs):
         """Simple implementation of get action.
         Supply search terms in a dictionary called params
@@ -167,7 +190,7 @@ class CiviCRM:
     def create(self, entity, params):
         """Simple implementation of create action"""
         # TODO OPTIONS?
-        return self._get('create', entity, params)
+        return self._post('create', entity, params)
         
     def update(self, entity, db_id, params):
         """Update a record"""
@@ -182,7 +205,7 @@ class CiviCRM:
         It appears it takes an id and single field and value
        """
         # TODO OPTIONS?
-        return self._get('setvalue', entity, 
+        return self._post('setvalue', entity, 
                 parameters={'id' :db_id, 'field' : field, 'value' : value})
         
     def delete(self, entity, db_id, skip_undelete = False):
@@ -194,7 +217,7 @@ class CiviCRM:
             params = {'id' : db_id, 'skip_undelete': 1}
         else:
             params = {'id' : db_id}
-        return self._get('delete', entity, params)
+        return self._post('delete', entity, params)
 
     def getcount(self, entity, params):
         """Returns the number of qualifying records.
@@ -217,7 +240,7 @@ class CiviCRM:
         """There are other actions for some entities, but
         these are undocumented?. This allows you to utilise
         these. Use with caution."""
-        return self._get(action, entity, params)
+        return self._post(action, entity, params)
 
 
 def _add_options(params, kwlist=None, **kwargs):
