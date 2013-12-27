@@ -196,7 +196,8 @@ class CiviCRM:
         """Update a record"""
         # TODO OPTIONS?
         # TODO does this work? check against test install 
-        return self.create(entity, params.update({'id' : db_id}))
+        params.update({'id' : db_id})
+        return self.create(entity, params)
         
                 
     def setvalue(self, entity, db_id, field, value):
