@@ -146,13 +146,16 @@ class CiviCRM:
         Pass limit and offset for a subset of the results
         (or pass them in  params). Other options can also be passed
         as key=value pairs (options as defined here:
-        http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory. 
+        http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory.
+        Returns a list of dictionaries or an empty list.
         """
         params = _add_options(params, kwargs)
         return self._get('get', entity, params)
 
     def getsingle(self, entity, params):
-        """Simple implementation of getsingle action"""
+        """Simple implementation of getsingle action.
+        Returns a dictionary. 
+        Raises a CiviCRM  error if no or multiple results are found."""
         # TODO OPTIONS?
         return self._get('getsingle', entity, params)
         
@@ -160,7 +163,8 @@ class CiviCRM:
     def getvalue(self, entity, returnfield, params):
         """Simple implementation of getvalue action.
         Will only return one field as unicodestring  
-        and expects only one result, as per get single."""
+        and expects only one result, as per get single.
+        Raises a CiviCRM  error if no or multiple results are found."""
         # TODO OPTIONS?
         params.update({'return' : returnfield})
         return self._get('getvalue', entity, params)
@@ -168,40 +172,44 @@ class CiviCRM:
 
     def search(self, entity, limit=None, offset=None, **kwargs):
         """Like get but using key=value rather than passing a dictionary.
-        Pass limit and offset for a subset of the results."""
-        """Search entity for field = value."""
+        Pass limit and offset for a subset of the results.
+        Returns in the same way as the get method"""
         #TODO support passing of option in Dict
         params = kwargs
         params = _add_options(params, limit=limit, offset=offset)
         return self._get('get', entity, params)
 
     def searchsingle(self, entity, **kwargs):
-        """Search entity for field=value, return single result"""
+        """Search entity for field=value, Returns a dictionary. 
+        Raises a CiviCRM  error if no or multiple results are found."""
         # TODO OPTIONS?
         return self._get('getsingle', entity, kwargs)
         
 
     def searchvalue(self, entity, returnfield, **kwargs):
         """Search entity for field = value, 
-        return single result with single field as unicode string"""
+        return single result with single field as unicode string
+        Raises a CiviCRM  error if no or multiple results are found."""
         # TODO OPTIONS?
         kwargs.update({'return' : returnfield})
         return self._get('getvalue', entity, kwargs)
 
     def create(self, entity, params):
-        """Simple implementation of create action"""
+        """Simple implementation of create action.
+        Returns a list of dictionaries of created entries."""
         # TODO OPTIONS?
         return self._post('create', entity, params)
         
     def update(self, entity, db_id, params):
-        """Update a record. An id must be supplied"""
+        """Update a record. An id must be supplied.
+        Returns a list of dictionaries of updated  entries."""
         # TODO OPTIONS?
         params.update({'id' : db_id})
         return self.create(entity, params)
 
     def updatevalues(self, entity, db_id, **kwargs):
-        """update a record using key=value pairs.
-        An id must be supplied."""
+        """update a record using key=value pairs. An id must be supplied.
+        Returns a list of dictionaries of updated  entries."""
         params = kwargs
         params.update({'id' : db_id})
         return self.create(entity, params)
