@@ -257,6 +257,7 @@ class CiviCRM:
     def getoptions(self, entity, field):
         """Returns a dictionary of options for fields
         as key/value pairs. Typically identical to each other.
+        (though sometimes appear to be synonyms? e.g. 1: Yes)
         Raises CiviCRM Error if a field has no associated options 
         or is not present etc"""
         parameters = {'field' : field, 'sequential' : 0}
