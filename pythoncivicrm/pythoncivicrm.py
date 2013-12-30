@@ -258,12 +258,12 @@ class CiviCRM:
         """Returns a dictionary of options for fields
         as key/value pairs. Typically identical to each other.
         (though sometimes appear to be synonyms? e.g. 1: Yes)
-        Raises CiviCRM Error if a field has no associated options 
+        Raises CivicrmError if a field has no associated options 
         or is not present etc"""
         parameters = {'field' : field, 'sequential' : 0}
         return self._get('getoptions', entity, parameters)
 
-    def doaction(self, entity, action, params):
+    def doaction(self,action ,entity, params=None):
         """There are other actions for some entities, but
         these are undocumented?. This allows you to utilise
         these. Use with caution."""
