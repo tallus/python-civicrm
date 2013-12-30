@@ -127,7 +127,7 @@ class CiviCRM:
         payload.update(parameters)
         # add (not) sequential of not set
         if not 'sequential' in payload:
-                payload['sequential'] = 1,
+                payload['sequential'] = 1
         return urlstring, payload
 
     def _check_results(self, results):
@@ -256,9 +256,11 @@ class CiviCRM:
 
     def getoptions(self, entity, field):
         """Returns a dictionary of options for fields
-        as key/value pairs. Typically identical to each other."""
-        return self._get('getoptions', entity, 
-            parameters = {'field' : field, 'sequential' : 0})
+        as key/value pairs. Typically identical to each other.
+        Raises CiviCRM Error if a field has no associated options 
+        or is not present etc"""
+        parameters = {'field' : field, 'sequential' : 0}
+        return self._get('getoptions', entity, parameters)
 
     def doaction(self, entity, action, params):
         """There are other actions for some entities, but
