@@ -116,16 +116,18 @@ class CiviCRM:
                 'key' : self.site_key,
                 'api_key' : self.api_key, 
                 'json' : 1,
-                'sequential' : 1,
                 'entity' : entity,
                 'action' : action
                 }
         # these should all be set explicitly so remove from parameters
         for badparam in ['site_key', 'api_key', 'entity', 'action', 
-                'json', 'sequential']:
+                'json']:
             parameters.pop(badparam, None)
         # add in parameters
         payload.update(parameters)
+        # add (not) sequential of not set
+        if not 'sequential' in payload:
+                payload['sequential'] = 1,
         return urlstring, payload
 
     def _check_results(self, results):
@@ -236,10 +238,16 @@ class CiviCRM:
         return self._post('delete', entity, params)
 
     def getcount(self, entity, params):
-        """Returns the number of qualifying records.
+        """Returns the number of qualifying records. Expects a dictionary.
         Mayt not be accurate for values > 25. (will return 25)"""
         return self._get('getcount', entity, params)
 
+    def getcountkw(self,entity, **kwargs):
+        """Returns the number of qualifying records. Takes key=value pairs.
+        May not be accurate for values > 25. (will return 25)"""
+        return self._get('getcount', entity, kwargs)
+        
+    
     def getfields(self, entity):
         """Returns a dictionary of fields for entity, where
         keys (and key['name']) are names of field and the value
