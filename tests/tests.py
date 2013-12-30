@@ -154,6 +154,28 @@ class MyTests(unittest.TestCase):
         self.assertEquals(results[0]['display_name'], 'foo, bar')
 
 
+    def test_getcount(self):
+        count = self.cc.getcount('Contact', {'contact_id': 2})
+        self.assertEquals(count, 1)
+        
+    def test_getcountkw(self):
+        count = self.cc.getcountkw('Contact', contact_id=2)
+        self.assertEquals(count, 1)
+
+    def test_getfields(self):
+        results = self.cc.getfields('Contact')
+        self.assertIn('id', results)
+
+    def test_getoptions(self):
+        results = self.cc.getoptions('Contact', 'contact_type')
+        self.assertIn('Organization', results)
+    
+    def test_getoptions_raises_error(self):
+        self.assertRaises(CivicrmError, self.cc.getoptions, 'Contact', 'city')
+
+    def test_doaction(self):
+        results = self.cc.doaction('get', 'Contact')
+        self.assertGreater(len(results), 1)
+
 if __name__ == '__main__':
     pass
-    
