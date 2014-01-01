@@ -75,17 +75,22 @@ class CiviCRM:
         """Set url,api keys, ssl usage."""
         # strip http(s):// off url 
         regex = re.compile('^https?://')
-        self.url = regex.sub('', url)
+        self.urlstring = regex.sub('', url)
         self.site_key = site_key
         self.api_key = api_key
         self.use_ssl = use_ssl
+        if self.use_ssl:
+            start = 'https://'
+        else:
+            start = 'http://'
+        self.url =  "%s%s/extern/rest.php" % (start, self.urlstring)
 
     def _get(self, action, entity, parameters=None):
         """Internal method to make api calls"""
         if not parameters:
             parameters = {}
-        urlstring, payload = self._construct_request(action, entity, parameters)
-        api_call = requests.get(urlstring, params=payload)
+        payload = self._construct_payload(action, entity, parameters)
+        api_call = requests.get(self.url, params=payload)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
                         % (urlstring, api_call.status_code))
@@ -96,22 +101,20 @@ class CiviCRM:
         """Internal method to make api calls"""
         if not parameters:
             parameters = {}
-        urlstring, payload = self._construct_request(action, entity, parameters)
-        api_call = requests.post(urlstring, params=payload)
+        payload = self._construct_payload(action, entity, parameters)
+        api_call = requests.post(self.url, params=payload)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
                         % (urlstring, api_call.status_code))
         results =  json.loads(api_call.content)
         return self._check_results(results)
 
-    def _construct_request(self, action, entity, parameters):
-        """Takes parameters, action, entity,
-        returns url strings and payload(sanitized params)"""
-        if self.use_ssl:
-            start = 'https://'
-        else:
-            start = 'http://'
-        urlstring = "%s%s/extern/rest.php" % (start, self.url)
+    def _get_urlstring(self):
+        """Returns url strings and payload"""
+        
+    def _construct_payload(self, action, entity, parameters):
+        """Takes action, entity, parameters
+        returns  payload(sanitized parameters)"""
         payload = {
                 'key' : self.site_key,
                 'api_key' : self.api_key, 
@@ -128,7 +131,7 @@ class CiviCRM:
         # add (not) sequential of not set
         if not 'sequential' in payload:
                 payload['sequential'] = 1
-        return urlstring, payload
+        return payload
 
     def _check_results(self, results):
         """returns relevant part of results or raise error"""
