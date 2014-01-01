@@ -93,7 +93,7 @@ class CiviCRM:
         api_call = requests.get(self.url, params=payload)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
-                        % (urlstring, api_call.status_code))
+                        % (self.url, api_call.status_code))
         results =  json.loads(api_call.content)
         return self._check_results(results)
 
@@ -105,12 +105,10 @@ class CiviCRM:
         api_call = requests.post(self.url, params=payload)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
-                        % (urlstring, api_call.status_code))
+                        % (self.url, api_call.status_code))
         results =  json.loads(api_call.content)
         return self._check_results(results)
 
-    def _get_urlstring(self):
-        """Returns url strings and payload"""
         
     def _construct_payload(self, action, entity, parameters):
         """Takes action, entity, parameters
