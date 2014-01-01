@@ -1,3 +1,5 @@
+"""Unit tests require running cicicrm instance loaded with sample data
+(only) do not trest against production machine."""
 import unittest
 from pythoncivicrm.pythoncivicrm import _add_options
 from pythoncivicrm.pythoncivicrm import CiviCRM
@@ -9,7 +11,7 @@ class MyTests(unittest.TestCase):
 
     def setUp(self):
         ip='192.168.56.101' # was '192.168.1.124'
-        url = "%s/drupal7/sites/all/modules/civicrm/extern/rest.php" % ip
+        url = "%s/drupal7/sites/all/modules/civicrm/" % ip
         site_key = '371cfadc834d2784a35e4f4ab20c1316'
         api_key = 'b734df56706432bb514ed737465424c3'
         self.cc = CiviCRM(url, site_key, api_key, use_ssl=False)
@@ -29,8 +31,8 @@ class MyTests(unittest.TestCase):
         results = _add_options({}, limit=1)
         self.assertEquals(len(results), 1)
 
-    def test__construct_request(self):
-        url, payload = self.cc._construct_request('get', 'Contact', 
+    def test__construct_payload(self):
+        payload = self.cc._construct_payload('get', 'Contact', 
                 {'json' : 0, 'contact_id': 2})
         self.assertEquals(payload['json'], 1)
         self.assertEquals(payload['contact_id'], 2)
