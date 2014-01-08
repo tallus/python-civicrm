@@ -1,7 +1,6 @@
 """Unit tests require running cicicrm instance loaded with sample data
 (only) do not trest against production machine."""
 import unittest
-from pythoncivicrm.pythoncivicrm import _add_options
 from pythoncivicrm.pythoncivicrm import CiviCRM
 from pythoncivicrm.pythoncivicrm import CivicrmError
 
@@ -23,12 +22,12 @@ class MyTests(unittest.TestCase):
         pass
          
     def test_add_options(self):
-        results = _add_options({}, limit=1,offset=0)
+        results = self.cc._add_options({}, limit=1,offset=0)
         expected = {u'options[limit]' : 1, u'options[offset]' : 0}
         self.assertEquals(expected['options[limit]'], 1)
     
     def test_add_single_option(self):
-        results = _add_options({}, limit=1)
+        results = self.cc._add_options({}, limit=1)
         self.assertEquals(len(results), 1)
 
     def test__construct_payload(self):

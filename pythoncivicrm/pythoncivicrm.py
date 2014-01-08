@@ -130,6 +130,22 @@ class CiviCRM:
         if not 'sequential' in payload:
                 payload['sequential'] = 1
         return payload
+    
+    def _add_options(self, params, kwlist=None, **kwargs):
+        """adds limit and offset etc in form required by REST API
+        Takes key=value pairs and/or a dictionary(kwlist) 
+        in addition to a parameter dictionary to extend"""
+        if kwlist:
+            for key, value in kwlist.iteritems():
+                if value:
+                    option = "options[%s]" % key
+                    params.update({option : value})
+            return params
+        for key, value in kwargs.iteritems():
+            if value:
+                option = "options[%s]" % key
+                params.update({option : value})
+        return params
 
     def _check_results(self, results):
         """returns relevant part of results or raise error"""
@@ -152,7 +168,7 @@ class CiviCRM:
         http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory.
         Returns a list of dictionaries or an empty list.
         """
-        params = _add_options(params, kwargs)
+        params = self._add_options(params, kwargs)
         return self._get('get', entity, params)
 
     def getsingle(self, entity, params):
@@ -179,7 +195,7 @@ class CiviCRM:
         Returns in the same way as the get method"""
         #TODO support passing of option in Dict
         params = kwargs
-        params = _add_options(params, limit=limit, offset=offset)
+        params = self._add_options(params, limit=limit, offset=offset)
         return self._get('get', entity, params)
 
     def searchsingle(self, entity, **kwargs):
@@ -269,25 +285,6 @@ class CiviCRM:
         these are undocumented?. This allows you to utilise
         these. Use with caution."""
         return self._post(action, entity, params)
-
-
-def _add_options(params, kwlist=None, **kwargs):
-    """adds limit and offset etc in form required by REST API
-    Takes key=value pairs and/or a dictionary(kwlist) 
-    in addition to a parameter dictionary to extend"""
-    if kwlist:
-        for key, value in kwlist.iteritems():
-            if value:
-                option = "options[%s]" % key
-                params.update({option : value})
-        return params
-
-    for key, value in kwargs.iteritems():
-        if value:
-            option = "options[%s]" % key
-            params.update({option : value})
-    return params
-
 
         # TODO
         # write functions to take Search parameters, get matching id's,
