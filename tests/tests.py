@@ -1,5 +1,5 @@
 """Unit tests require running cicicrm instance loaded with sample data
-(only) do not trest against production machine."""
+(only) do not test against production machine."""
 import unittest
 from pythoncivicrm.pythoncivicrm import CiviCRM
 from pythoncivicrm.pythoncivicrm import CivicrmError
@@ -9,7 +9,7 @@ class MyTests(unittest.TestCase):
         # pylint: disable=R0904
 
     def setUp(self):
-        ip='192.168.56.101' # was '192.168.1.124'
+        ip = '192.168.56.101' # was '192.168.1.124'
         url = "%s/drupal7/sites/all/modules/civicrm/" % ip
         site_key = '371cfadc834d2784a35e4f4ab20c1316'
         api_key = 'b734df56706432bb514ed737465424c3'
@@ -195,6 +195,20 @@ class MyTests(unittest.TestCase):
     def test_create_contact_wrong_type(self):
         self.assertRaisesRegexp(CivicrmError,'wrong type', 
                 self.cc.create_contact,'foo')
+
+    def test_add_relationship_by_id(self):
+        result = self.cc.add_relationship(101, 102, 1)
+        self.cc.delete('Relationship', result['id'], True)
+        self.assertEquals(result['relationship_type_id'], '1')
+
+    def test_add_relationship_by_type(self):
+        result = self.cc.add_relationship(101, 102, 'Partner of')
+        self.cc.delete('Relationship', result['id'], True)
+        self.assertEquals(result['relationship_type_id'], '3')
+
+    def test_add_relationship_type_not_found(self):
+        self.assertRaises(CivicrmError, 
+                self.cc.add_relationship, 101, 102, 'Aunt of')
 
     def test_matches_required_no_match(self):
         required = ['exists']

@@ -288,10 +288,10 @@ class CiviCRM:
 
 
     def create_contact(self, params):
-        """Create a contact from supplied dict.
+        """Creates a contact from supplied dictionary params.
         Raises a CivicrmError if a required field is not supplied:
         contact_type and/or one of  first_name, last_name, 
-        email, display_name"""
+        email, display_name. Returns a dictionary of the contact created"""
         required = ['first_name', 'last_name', 'email', 'display_name']
         missing_fields =  matches_required(required, params)
         if type(params) is not dict:
@@ -302,7 +302,43 @@ class CiviCRM:
             raise CivicrmError('One of the following fields must exist:%s'
                     % ", ".join(missing_fields))
         return self.create('Contact', params)[0]
-   
+
+    def add_relationship(self, contact_a, contact_b, relationship, 
+            **kwargs):
+        """Adds a relationship between contact_a and contact_b.
+        Contacts must be supplied as id's (int).
+        If the relationship is supplied as an int it is assumend to be an id,
+        otherwise name_a_b, label_a_b, name_b_a, label_b_a  and description 
+        are searched for a match. 
+        A CivicrmError is raised if no match is found. 
+        N.B. 'Alice', 'Bob', 'Employer of' means Bob is the employer of Alice.
+        Non compulsory fields may be passed in a keyword pairs.
+        Searching for a match will hit the API and may do so multiple times,
+        you may find it beneficial to check the result for 
+        'relationship_type_id' and cache this result.
+        Returns a dictionary of the contact created."""
+        params = kwargs
+        relationship_id = None
+        if type(relationship) is int:
+            relationship_id = relationship
+        else:
+            for field in ['name_a_b', 'label_a_b', 
+                    'name_b_a', 'label_b_a', 'description']:
+                result =  self.get('RelationshipType', 
+                        {field : relationship, 'return' : ['id']})
+                if result:
+                    relationship_id = result[0]['id']
+                    break
+        if not relationship_id:
+            raise CivicrmError('invalid relationship %s' % relationship)
+        params.update({
+                    'relationship_type_id' : relationship_id, 
+                    'contact_id_a' : contact_a,
+                    'contact_id_b' : contact_b
+                    })
+        return self.create('Relationship', params)[0]
+
+
 def matches_required(required, params):
     """if none of the fields in the list required are in params,
     returns a list of missing fields, or None"""
