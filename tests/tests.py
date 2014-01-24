@@ -3,7 +3,7 @@
 import unittest
 from pythoncivicrm.pythoncivicrm import CiviCRM
 from pythoncivicrm.pythoncivicrm import CivicrmError
-
+from pythoncivicrm.pythoncivicrm import matches_required
 
 class MyTests(unittest.TestCase):
         # pylint: disable=R0904
@@ -178,5 +178,36 @@ class MyTests(unittest.TestCase):
         results = self.cc.doaction('get', 'Contact')
         self.assertGreater(len(results), 1)
 
+    def test_create_contact(self):
+        results =  self.cc.create_contact(
+                {'display_name': 'test', 'contact_type' : 'Individual'})
+        self.cc.delete('Contact', results['id'], True)
+        self.assertEquals(results['display_name'], 'test')
+
+    def test_create_contact_contact_type_missing(self):
+        self.assertRaisesRegexp(CivicrmError, 'contact_type',
+                self.cc.create_contact, {'display_name' : 'test'})
+    
+    def test_create_contact_required_field_missing(self):
+        self.assertRaisesRegexp(CivicrmError, 'fields must exist',
+                self.cc.create_contact, {'contact_type' : 'Individual'})
+    
+    def test_create_contact_wrong_type(self):
+        self.assertRaisesRegexp(CivicrmError,'wrong type', 
+                self.cc.create_contact,'foo')
+
+    def test_matches_required_no_match(self):
+        required = ['exists']
+        params = {'does not exist' : True}
+        results = matches_required(required, params)
+        self.assertEquals(results, ['exists'])
+    
+    def test_matches_required_matches(self):
+        required = ['exists']
+        params = {'exists' : True}
+        results = matches_required(required, params)
+        self.assertEquals(results, None)
+
+    
 if __name__ == '__main__':
     pass

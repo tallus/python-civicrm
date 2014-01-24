@@ -286,10 +286,40 @@ class CiviCRM:
         these. Use with caution."""
         return self._post(action, entity, params)
 
-        # TODO
-        # write functions to take Search parameters, get matching id's,
-        # then calling setvalue or update,
-        #allowing for refusing to update more than  one record
-        # or not sort_name=com.com
-        # unit test with test db/ mock
+
+    def create_contact(self, params):
+        """Create a contact from supplied dict.
+        Raises a CivicrmError if a required field is not supplied:
+        contact_type and/or one of  first_name, last_name, 
+        email, display_name"""
+        required = ['first_name', 'last_name', 'email', 'display_name']
+        missing_fields =  matches_required(required, params)
+        if type(params) is not dict:
+            raise CivicrmError('wrong type supplied, a dict is required')
+        elif not 'contact_type' in params:
+            raise CivicrmError('contact_type must be set')
+        elif missing_fields:
+            raise CivicrmError('One of the following fields must exist:%s'
+                    % ", ".join(missing_fields))
+        return self.create('Contact', params)[0]
+   
+def matches_required(required, params):
+    """if none of the fields in the list required are in params,
+    returns a list of missing fields, or None"""
+    missing = []
+    for key in required:
+        # there is a required field so return right away
+        if key in params:
+            return None
+        else:
+            missing.append(key)
+    return missing
+
+
+    # TODO
+    # write functions to take Search parameters, get matching id's,
+    # then calling setvalue or update,
+    #allowing for refusing to update more than  one record
+    # or not sort_name=com.com
+    # unit test with test db/ mock
       
