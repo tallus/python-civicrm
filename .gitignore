@@ -44,3 +44,6 @@ nosetests.xml
 .pydevproject
 
 extract.py
+.ipynb_checkpoints/
+*.ipynb
+
