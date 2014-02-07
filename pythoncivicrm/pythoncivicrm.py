@@ -338,6 +338,58 @@ class CiviCRM:
                     })
         return self.create('Relationship', params)[0]
 
+    def add_activity_type(self, label, weight=5, is_active=0, **kwargs):
+        """Creates an Activity Type. Label is a string describing the activity
+        spaces are allowed.  Weight is any postive or negative integer. It 
+        affects the order in which things are displayed in the web interface.
+        It defaults to 5, this puts things just after the basic types such
+        as Phone Call. is_active defaults to 0: disabled (as per CiviCRM.
+        Set to 1 to make the Activity Type active""" 
+        params = kwargs
+        params.update({
+               'label' : label,
+               'weight': weight,
+               'is_active' : is_active
+               })
+        return self.create('ActivityType', params)[0]
+
+    def add_activity(self, label, sourceid,
+        subject=None, date_time=None, status=None, **kwargs):
+        """Creates an activity. label is predefined. User
+        defined labels are possible so checking is via the API.
+        sourceid is an int, typically the contact_id for
+        the person creating the activity, loosely defined.
+        There is aslo a target_contact_id for person contacted etc.
+        Subject is a string, typically a summary of the activity. 
+        date_time should be string not a datetime object. 
+        Status can be an integer or a string.see the status_types dict."""
+        status_types = {
+            "Scheduled" : 1,
+            "Completed" : 2, 
+            "Cancelled" : 3, 
+            "Left Message" : 4,
+            "Unreachable" : 5,
+            "Not Required" : 6,
+            "Available" : 7,
+            "No-show": 8
+            }
+        if type(status) is str:
+            status = status.capitalize()
+        if type(status) is int and 0 < status < 9:
+            sid = status
+        elif  status in status_types:
+            sid = status_types[status]
+        else:
+            raise CivicrmError("invalid status %s" % status) 
+        params = kwargs
+        params.update({
+            'activity_label' : label,
+            'source_contact_id' : sourceid,
+            'subject' : subject,
+            'activity_date_time' : date_time,
+            'status_id' : sid
+            })
+        return self.create('Activity', params)[0]
 
 def matches_required(required, params):
     """if none of the fields in the list required are in params,

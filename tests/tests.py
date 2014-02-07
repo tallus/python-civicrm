@@ -14,6 +14,7 @@ class MyTests(unittest.TestCase):
         site_key = '371cfadc834d2784a35e4f4ab20c1316'
         api_key = 'b734df56706432bb514ed737465424c3'
         self.cc = CiviCRM(url, site_key, api_key, use_ssl=False)
+        self.contact_id = 202 # id for a valid civicrm user
 
     def tearDown(self):
         pass
@@ -209,6 +210,40 @@ class MyTests(unittest.TestCase):
     def test_add_relationship_type_not_found(self):
         self.assertRaises(CivicrmError, 
                 self.cc.add_relationship, 101, 102, 'Aunt of')
+    
+    def test_add_activity_type(self):
+        result = self.cc.add_activity_type('test_activity_type', 
+                is_active=1)
+        atypes  = self.cc.get('ActivityType')
+        self.cc.delete('ActivityType', result['id'], True)
+        self.assertIn('test_activity_type', atypes)
+
+    def test_add_activity_by_status_id(self):
+        result = self.cc.add_activity("Meeting", self.contact_id, 
+                subject = "test",status = 2,  is_test=1)
+        self.cc.delete('Activity', result['id'], True)
+        self.assertEquals(result['activity_type_id'], '1')
+    
+    def test_add_activity_by_status_type(self):
+        result = self.cc.add_activity("Meeting", self.contact_id,
+                subject = "test", status = "completed", is_test=1)
+        self.cc.delete('Activity', result['id'], True)
+        self.assertEquals(result['activity_type_id'], '1')
+
+    def test_add_activity_invalid_label(self):
+        self.assertRaises(CivicrmError,
+            self.cc.add_activity,"Not A Meeting", self.contact_id,  
+            "test", "0000", 2)
+
+    def test_add_activity_invalid_status_id(self):
+        self.assertRaises(CivicrmError,
+            self.cc.add_activity,"Meeting", self.contact_id, 
+            "test", "0000", 10)
+
+    def test_add_activity_invalid_status_type(self):
+        self.assertRaises(CivicrmError,
+            self.cc.add_activity,"Meeting", self.contact_id,
+            "test", "0000", "test")
 
     def test_matches_required_no_match(self):
         required = ['exists']
