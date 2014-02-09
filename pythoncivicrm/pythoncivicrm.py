@@ -28,22 +28,23 @@ A CivicrmError will be raised for anything other than a 200 respose e.g. 404
 
 Usage
 -----
-Use example for a basic search::
+Usage example for a basic search::
 
     url = 'www.example.org/path/to/civi/codebase/civicrm/extern/rest.php'
     site_key ='your site key'
     api_key ='your api key'
     civicrm = CiviCRM(url, site_key, api_key)
 
-    search results = civicrm.get('Contact', city='Gotham City')
-    first_10_search results = civicrm.get('Contact', search_terms, limit=10)
+    search_results = civicrm.get('Contact', city='Gotham City')
+    first_10_search_results = civicrm.get('Contact', 
+            city='Gotham City', limit=10)
 
 .. _things-to-note:
 
 Things to note
 --------------
 
-* though methods typically expect to take key=values pairs, it can be easier 
+* Though methods typically expect to take key=values pairs, it can be easier 
 to feed them a dict and expand it with the ** notatation like so:
     my_dict =   {
                 country' : 'United States', 
@@ -51,13 +52,27 @@ to feed them a dict and expand it with the ** notatation like so:
                 contact_type='Individual
                 }
     civicrm.get('Contact', **my_dict)
-* Of the options defined in the CiviCRM API <a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">here</a> only limit, offset (& sequential) are currently supported, sequential is set to 1 (true) by default and should not generally be changed .
-* Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.
-* The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
-* Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
+* Of the options defined in the CiviCRM API 
+http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters
+<a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">here</a> 
+only limit, offset (& sequential) are currently supported, sequential is set 
+to 1 (true) by default and should not generally be changed .
+* Entity and Action must always be specified explicitly. They are removed if 
+found in params, along with references to site/api keys.
+* The CiviCRM API typically returns JSON (that would decode to a dictionary) 
+with the actual results you want stored in values(or result if a single value
+is expected). Additional info is typically API version and count. If results 
+are returned successfully we only return the results themselves -- typically 
+a list of dictionaries, as this API version is always 3 with this module, 
+and count can easily be derived using len().
+* Returned values are generally sequential (i.e. a list (of dictionaries) 
+rather than a dictionary (of dictionaries) with numbers for keys) except in 
+the case of getfields & getoptions that return  a dictionary with real keys.
 * Results are unicode
-* Most actions returns the (updated) record in question, others a count e.g. delete
-* the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
+* Most actions returns the (updated) record in question, others a count e.g.
+delete
+* the  replace API call is undocumented ,AFAIK, so not implemented, 
+use getaction if you must.
 """
 
 
