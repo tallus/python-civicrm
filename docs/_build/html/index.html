@@ -71,27 +71,35 @@ with how things are returned. See <a class="reference internal" href="#things-to
 <p>A CivicrmError will be raised for anything other than a 200 respose e.g. 404</p>
 <div class="section" id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
-<p>Use example for a basic search:</p>
-<div class="highlight-python"><pre>url = 'www.example.org/path/to/civi/codebase/civicrm/extern/rest.php'
-site_key ='your site key'
-api_key ='your api key'
-civicrm = CiviCRM(url, site_key, api_key)
+<p>Usage example for a basic search:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="n">url</span> <span class="o">=</span> <span class="s">&#39;www.example.org/path/to/civi/codebase/civicrm/extern/rest.php&#39;</span>
+<span class="n">site_key</span> <span class="o">=</span><span class="s">&#39;your site key&#39;</span>
+<span class="n">api_key</span> <span class="o">=</span><span class="s">&#39;your api key&#39;</span>
+<span class="n">civicrm</span> <span class="o">=</span> <span class="n">CiviCRM</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">site_key</span><span class="p">,</span> <span class="n">api_key</span><span class="p">)</span>
 
-
-search_terms = {'city' : 'Gotham City', 'contact_type' : 'Individual'}
-search results = civicrm.get('Contact', search_terms)
-first_10_search results = civicrm.get('Contact', search_terms, limit=10)</pre>
+<span class="n">search_results</span> <span class="o">=</span> <span class="n">civicrm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Contact&#39;</span><span class="p">,</span> <span class="n">city</span><span class="o">=</span><span class="s">&#39;Gotham City&#39;</span><span class="p">)</span>
+<span class="n">first_10_search_results</span> <span class="o">=</span> <span class="n">civicrm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;Contact&#39;</span><span class="p">,</span> 
+        <span class="n">city</span><span class="o">=</span><span class="s">&#39;Gotham City&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It can be easier to construct a dict and feed them to methods using ** to expand it to key value pairs:</p>
+<div class="highlight-python"><pre>my_dict =   {
+            country' : 'United States', 
+            city='Gotham City', 
+            contact_type='Individual
+            }
+civicrm.get('Contact', **my_dict)</pre>
 </div>
 </div>
 <div class="section" id="things-to-note">
 <span id="id1"></span><h3>Things to note<a class="headerlink" href="#things-to-note" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Unless otherwise specified methods expect to take a dictionary of values, rather than kwargs**, this is params in the parameters, when used.</li>
-<li>Except for options as defined in the CiviCRM API &lt;a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters&#8221;&gt;here&lt;/a&gt;.</li>
+<li>Of the options defined in the CiviCRM API <a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters</a> &lt;a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters&#8221;&gt;here&lt;/a&gt; only limit, offset (&amp; sequential) are currently supported, sequential is set to 1 (true) by default and should not generally be changed .</li>
 <li>Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.</li>
 <li>The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves &#8211; typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().</li>
 <li>Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields &amp; getoptions that return  a dictionary with real keys.</li>
-<li>results are unicode</li>
+<li>Results are unicode</li>
+<li>Most actions returns the (updated) record in question, others a count e.g. delete</li>
 <li>the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.</li>
 </ul>
 <dl class="class">
@@ -99,9 +107,60 @@ first_10_search results = civicrm.get('Contact', search_terms, limit=10)</pre>
 <em class="property">class </em><tt class="descclassname">pythoncivicrm.</tt><tt class="descname">CiviCRM</tt><big>(</big><em>url</em>, <em>site_key</em>, <em>api_key</em>, <em>use_ssl=True</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM" title="Permalink to this definition">¶</a></dt>
 <dd><p>make calls against the civicrm api</p>
 <dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_activity">
+<tt class="descname">add_activity</tt><big>(</big><em>label</em>, <em>sourceid</em>, <em>subject=None</em>, <em>date_time=None</em>, <em>status=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_activity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an activity. label is predefined. User
+defined labels are possible so checking is via the API.
+sourceid is an int, typically the contact_id for
+the person creating the activity, loosely defined.
+There is aslo a target_contact_id for person contacted etc.
+Subject is a string, typically a summary of the activity. 
+date_time should be string not a datetime object. 
+Status can be an integer or a string.see the status_types dict.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_activity_type">
+<tt class="descname">add_activity_type</tt><big>(</big><em>label</em>, <em>weight=5</em>, <em>is_active=0</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_activity_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an Activity Type. Label is a string describing the activity
+spaces are allowed.  Weight is any postive or negative integer. It 
+affects the order in which things are displayed in the web interface.
+It defaults to 5, this puts things just after the basic types such
+as Phone Call. is_active defaults to 0: disabled (as per CiviCRM.
+Set to 1 to make the Activity Type active</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_relationship">
+<tt class="descname">add_relationship</tt><big>(</big><em>contact_a</em>, <em>contact_b</em>, <em>relationship</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_relationship" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a relationship between contact_a and contact_b.
+Contacts must be supplied as id&#8217;s (int).
+If the relationship is supplied as an int it is assumend to be an id,
+otherwise name_a_b, label_a_b, name_b_a, label_b_a  and description 
+are searched for a match. 
+A CivicrmError is raised if no match is found. 
+N.B. &#8216;Alice&#8217;, &#8216;Bob&#8217;, &#8216;Employer of&#8217; means Bob is the employer of Alice.
+Non compulsory fields may be passed in a keyword pairs.
+Searching for a match will hit the API and may do so multiple times,
+you may find it beneficial to check the result for 
+&#8216;relationship_type_id&#8217; and cache this result.
+Returns a dictionary of the contact created.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pythoncivicrm.CiviCRM.create">
-<tt class="descname">create</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.create" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple implementation of create action</p>
+<tt class="descname">create</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of create action.
+Returns a list of dictionaries of created entries.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.create_contact">
+<tt class="descname">create_contact</tt><big>(</big><em>contact_type</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.create_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a contact from supplied dictionary params.
+Raises a CivicrmError if a required field is not supplied:
+contact_type and/or one of  first_name, last_name, 
+email, display_name. Returns a dictionary of the contact created</p>
 </dd></dl>
 
 <dl class="method">
@@ -109,12 +168,13 @@ first_10_search results = civicrm.get('Contact', search_terms, limit=10)</pre>
 <tt class="descname">delete</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>skip_undelete=False</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.delete" title="Permalink to this definition">¶</a></dt>
 <dd><p>Delete a record. Set skip_undelete to True, to 
 permanently delete a record for cases  where there
-is a &#8216;recycle bin&#8217; e.g. contacts</p>
+is a &#8216;recycle bin&#8217; e.g. contacts
+Returns number of deleted records</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.doaction">
-<tt class="descname">doaction</tt><big>(</big><em>entity</em>, <em>action</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.doaction" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">doaction</tt><big>(</big><em>action</em>, <em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.doaction" title="Permalink to this definition">¶</a></dt>
 <dd><p>There are other actions for some entities, but
 these are undocumented?. This allows you to utilise
 these. Use with caution.</p>
@@ -122,19 +182,20 @@ these. Use with caution.</p>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.get">
-<tt class="descname">get</tt><big>(</big><em>entity</em>, <em>params=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.get" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">get</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple implementation of get action.
 Supply search terms in a dictionary called params
 Pass limit and offset for a subset of the results
 (or pass them in  params). Other options can also be passed
 as key=value pairs (options as defined here:
-<a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters</a> e.g. match, match mandatory.</p>
+<a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters</a> e.g. match, match mandatory.
+Returns a list of dictionaries or an empty list.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.getcount">
-<tt class="descname">getcount</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getcount" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the number of qualifying records.
+<tt class="descname">getcount</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getcount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the number of qualifying records. Expects a dictionary.
 Mayt not be accurate for values &gt; 25. (will return 25)</p>
 </dd></dl>
 
@@ -150,41 +211,27 @@ is a dictionary describing that field</p>
 <dt id="pythoncivicrm.CiviCRM.getoptions">
 <tt class="descname">getoptions</tt><big>(</big><em>entity</em>, <em>field</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getoptions" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of options for fields
-as key/value pairs. Typically identical to each other.</p>
+as key/value pairs. Typically identical to each other.
+(though sometimes appear to be synonyms? e.g. 1: Yes)
+Raises CivicrmError if a field has no associated options 
+or is not present etc</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.getsingle">
-<tt class="descname">getsingle</tt><big>(</big><em>entity</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getsingle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Simple implementation of getsingle action</p>
+<tt class="descname">getsingle</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getsingle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple implementation of getsingle action.
+Returns a dictionary. 
+Raises a CiviCRM  error if no or multiple results are found.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.getvalue">
-<tt class="descname">getvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getvalue" title="Permalink to this definition">¶</a></dt>
+<tt class="descname">getvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getvalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple implementation of getvalue action.
 Will only return one field as unicodestring  
-and expects only one result, as per get single.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pythoncivicrm.CiviCRM.search">
-<tt class="descname">search</tt><big>(</big><em>entity</em>, <em>limit=None</em>, <em>offset=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.search" title="Permalink to this definition">¶</a></dt>
-<dd><p>Like get but using key=value rather than passing a dictionary.
-Pass limit and offset for a subset of the results.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pythoncivicrm.CiviCRM.searchsingle">
-<tt class="descname">searchsingle</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchsingle" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search entity for field=value, return single result</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="pythoncivicrm.CiviCRM.searchvalue">
-<tt class="descname">searchvalue</tt><big>(</big><em>entity</em>, <em>returnfield</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.searchvalue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Search entity for field = value, 
-return single result with single field as unicode string</p>
+and expects only one result, as per get single.
+Raises a CiviCRM  error if no or multiple results are found.</p>
 </dd></dl>
 
 <dl class="method">
@@ -192,15 +239,24 @@ return single result with single field as unicode string</p>
 <tt class="descname">setvalue</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>field</em>, <em>value</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.setvalue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Updates a single field.
 This is not well documented, use at own risk.
-It appears it takes an id and single field and value</p>
+Takes an id and single field and value, 
+returns a dictionary with the updated field and record.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.update">
-<tt class="descname">update</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.update" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update a record</p>
+<tt class="descname">update</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update a record. An id must be supplied.
+Returns a list of dictionaries of updated  entries.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="pythoncivicrm.matches_required">
+<tt class="descclassname">pythoncivicrm.</tt><tt class="descname">matches_required</tt><big>(</big><em>required</em>, <em>params</em><big>)</big><a class="headerlink" href="#pythoncivicrm.matches_required" title="Permalink to this definition">¶</a></dt>
+<dd><p>if none of the fields in the list required are in params,
+returns a list of missing fields, or None</p>
 </dd></dl>
 
 </div>
