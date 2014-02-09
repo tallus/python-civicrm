@@ -58,110 +58,78 @@ class MyTests(unittest.TestCase):
         self.assertGreater(len(results), 1)
     
     def test_get_with_params(self):
-        results = self.cc.get('Contact', {'contact_id': 2})
+        results = self.cc.get('Contact', contact_id=2)
         result = results[0]
         self.assertEquals(result['sort_name'], 'Terry, Brittney')
 
     def test_get_with__multiple_params(self):
-        results = self.cc.get('Contact', {'contact_type': 'Individual',
+        results = self.cc.get('Contact', **{'contact_type': 'Individual',
             'Country' : 'United States'})
         self.assertGreater(len(results), 1)
 
     def test_get_with_limit_offset(self):
-        results = self.cc.get('Contact', {'contact_type': 'Individual',
-            'Country' : 'United States'}, limit=2,offset=0)
+        results = self.cc.get('Contact', **{'contact_type': 'Individual','Country' : 'United States', 'limit': 2, 'offset': 0})
         result = results[0]
         self.assertEquals(result['sort_name'], 'Terry, Brittney')
         self.assertEquals(len(results), 2)
 
     def test_get_null_set(self):
-        results = self.cc.get('Contact', {'contact_id': 100000})
+        results = self.cc.get('Contact', contact_id=100000)
         self.assertEquals(results, [])
 
     def test_get_invalid_option(self):
         self.assertRaises(CivicrmError,self.cc.get, 
-                'Contact', {'contact_id': 'a'})
+                'Contact', contact_id='a')
 
     def test_getsingle(self):
-        results = self.cc.getsingle('Contact', {'contact_id': 2})
+        results = self.cc.getsingle('Contact',contact_id=2)
         self.assertEquals(results['sort_name'], 'Terry, Brittney')
 
     def test_getsingle_multiple_results(self):
         self.assertRaises(CivicrmError, self.cc.getsingle, 
-            'Contact', {'Country' : 'United States'})
+            'Contact', country='United States')
 
     def test_getvalue(self):
-        results = self.cc.getvalue('Contact', 'sort_name', {'contact_id': 2})
+        results = self.cc.getvalue('Contact', 'sort_name', contact_id=2)
         self.assertEquals(type(results), unicode)
         self.assertEquals(results, 'Terry, Brittney')
         
     def test_getvalue_multiple_results(self):
         self.assertRaises(CivicrmError, self.cc.getvalue, 
-            'Contact', 'sort_name', {'Country' : 'United States'})
+            'Contact', 'sort_name', country='United States')
     
-    def test_search(self):
-        results = self.cc.search('Contact', contact_id=2)
-        result = results[0]
-        self.assertEquals(result['sort_name'], 'Terry, Brittney')
-
-    def test_searchsingle(self):
-        results = self.cc.searchsingle('Contact', contact_id=2)
-        self.assertEquals(results['sort_name'], 'Terry, Brittney')
-
-    def test_searchvalue(self):
-        results = self.cc.searchvalue('Contact', 'sort_name', contact_id=2)
-        self.assertEquals(type(results), unicode)
-        self.assertEquals(results, 'Terry, Brittney')
-
     def test_create(self):
         results = self.cc.create('Contact', 
-                {'contact_type' : 'individual', 'display_name' : 'bar, foo'})
+                contact_type='individual', display_name='bar, foo')
         self.cc.delete('Contact', results[0]['id'], True)
         self.assertEquals(results[0]['display_name'], 'bar, foo')
     
     def test_delete(self):
         cresults = self.cc.create('Contact', 
-                {'contact_type' : 'individual', 'display_name' : 'bar, foo'})
+                contact_type='individual', display_name='bar, foo')
         results = self.cc.delete('Contact', cresults[0]['id'], True)
         self.assertEquals(results, 1)
 
     def test_update(self):
         cresults = self.cc.create('Contact', 
-                {'contact_type' : 'individual', 
-                 'display_name' : 'bar, foo'})
+                contact_type='individual', display_name='bar, foo')
         myid = cresults[0]['id']
-        results = self.cc.update('Contact', myid,
-                {'display_name' : 'foo, bar'})
+        results = self.cc.update('Contact', myid, display_name='foo, bar')
         self.cc.delete('Contact', myid, True)
         self.assertEquals(results[0]['display_name'], 'foo, bar')
 
     def test_setvalue(self):
         cresults = self.cc.create('Contact', 
-                {'contact_type' : 'individual', 
-                 'display_name' : 'bar, foo'})
+                contact_type='individual', display_name='bar, foo')
         myid = cresults[0]['id']
         results = self.cc.setvalue('Contact', myid, 
                 'display_name', 'foo, bar')
         self.cc.delete('Contact', myid, True)
         self.assertEquals(results['display_name'], 'foo, bar')
 
-    def test_updatevalues(self):
-        cresults = self.cc.create('Contact', 
-                {'contact_type' : 'individual', 
-                 'display_name' : 'bar, foo'})
-        myid = cresults[0]['id']
-        results = self.cc.updatevalues('Contact', myid,
-                display_name = 'foo, bar')
-        self.cc.delete('Contact', myid, True)
-        self.assertEquals(results[0]['display_name'], 'foo, bar')
-
 
     def test_getcount(self):
-        count = self.cc.getcount('Contact', {'contact_id': 2})
-        self.assertEquals(count, 1)
-        
-    def test_getcountkw(self):
-        count = self.cc.getcountkw('Contact', contact_id=2)
+        count = self.cc.getcount('Contact', contact_id=2)
         self.assertEquals(count, 1)
 
     def test_getfields(self):
@@ -181,21 +149,18 @@ class MyTests(unittest.TestCase):
 
     def test_create_contact(self):
         results =  self.cc.create_contact(
-                {'display_name': 'test', 'contact_type' : 'Individual'})
+                contact_type='Individual', display_name='test')
         self.cc.delete('Contact', results['id'], True)
         self.assertEquals(results['display_name'], 'test')
 
-    def test_create_contact_contact_type_missing(self):
-        self.assertRaisesRegexp(CivicrmError, 'contact_type',
-                self.cc.create_contact, {'display_name' : 'test'})
-    
     def test_create_contact_required_field_missing(self):
         self.assertRaisesRegexp(CivicrmError, 'fields must exist',
-                self.cc.create_contact, {'contact_type' : 'Individual'})
+                self.cc.create_contact, contact_type='Individual')
     
     def test_create_contact_wrong_type(self):
-        self.assertRaisesRegexp(CivicrmError,'wrong type', 
-                self.cc.create_contact,'foo')
+        self.assertRaisesRegexp(CivicrmError,' not a valid option',
+                self.cc.create_contact, 'not a contact type', 
+                display_name='test')
 
     def test_add_relationship_by_id(self):
         result = self.cc.add_relationship(101, 102, 1)

@@ -35,9 +35,7 @@ Use example for a basic search::
     api_key ='your api key'
     civicrm = CiviCRM(url, site_key, api_key)
 
-
-    search_terms = {'city' : 'Gotham City', 'contact_type' : 'Individual'}
-    search results = civicrm.get('Contact', search_terms)
+    search results = civicrm.get('Contact', city='Gotham City')
     first_10_search results = civicrm.get('Contact', search_terms, limit=10)
 
 .. _things-to-note:
@@ -45,8 +43,15 @@ Use example for a basic search::
 Things to note
 --------------
 
-* Unless otherwise specified methods expect to take a dictionary of values, rather than kwargs**, this is params in the parameters, when used. 
-* Except for options as defined in the CiviCRM API <a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">here</a>.
+* though methods typically expect to take key=values pairs, it can be easier 
+to feed them a dict and expand it with the ** notatation like so:
+    my_dict =   {
+                country' : 'United States', 
+                city='Gotham City', 
+                contact_type='Individual
+                }
+    civicrm.get('Contact', **my_dict)
+* Of the options defined in the CiviCRM API <a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">here</a> only limit, offset (& sequential) are currently supported, sequential is set to 1 (true) by default and should not generally be changed .
 * Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.
 * The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
@@ -126,21 +131,15 @@ class CiviCRM:
             parameters.pop(badparam, None)
         # add in parameters
         payload.update(parameters)
-        # add (not) sequential of not set
+        # add (not) sequential if not set
         if not 'sequential' in payload:
                 payload['sequential'] = 1
         return payload
     
-    def _add_options(self, params, kwlist=None, **kwargs):
+    def _add_options(self, params, **kwargs):
         """adds limit and offset etc in form required by REST API
         Takes key=value pairs and/or a dictionary(kwlist) 
         in addition to a parameter dictionary to extend"""
-        if kwlist:
-            for key, value in kwlist.iteritems():
-                if value:
-                    option = "options[%s]" % key
-                    params.update({option : value})
-            return params
         for key, value in kwargs.iteritems():
             if value:
                 option = "options[%s]" % key
@@ -159,7 +158,7 @@ class CiviCRM:
             return results
 
    
-    def get(self, entity, params=None, **kwargs):
+    def get(self, entity, **kwargs):
         """Simple implementation of get action.
         Supply search terms in a dictionary called params
         Pass limit and offset for a subset of the results
@@ -168,71 +167,40 @@ class CiviCRM:
         http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters e.g. match, match mandatory.
         Returns a list of dictionaries or an empty list.
         """
-        params = self._add_options(params, kwargs)
+        limit = kwargs.pop('limit', None)
+        offset = kwargs.pop('offset', None)
+        params = self._add_options(kwargs, limit=limit, offset=offset)
         return self._get('get', entity, params)
 
-    def getsingle(self, entity, params):
+    def getsingle(self, entity, **kwargs):
         """Simple implementation of getsingle action.
         Returns a dictionary. 
-        Raises a CiviCRM  error if no or multiple results are found."""
-        # TODO OPTIONS?
-        return self._get('getsingle', entity, params)
-        
-
-    def getvalue(self, entity, returnfield, params):
-        """Simple implementation of getvalue action.
-        Will only return one field as unicodestring  
-        and expects only one result, as per get single.
-        Raises a CiviCRM  error if no or multiple results are found."""
-        # TODO OPTIONS?
-        params.update({'return' : returnfield})
-        return self._get('getvalue', entity, params)
-        
-
-    def search(self, entity, limit=None, offset=None, **kwargs):
-        """Like get but using key=value rather than passing a dictionary.
-        Pass limit and offset for a subset of the results.
-        Returns in the same way as the get method"""
-        #TODO support passing of option in Dict
-        params = kwargs
-        params = self._add_options(params, limit=limit, offset=offset)
-        return self._get('get', entity, params)
-
-    def searchsingle(self, entity, **kwargs):
-        """Search entity for field=value, Returns a dictionary. 
         Raises a CiviCRM  error if no or multiple results are found."""
         # TODO OPTIONS?
         return self._get('getsingle', entity, kwargs)
         
 
-    def searchvalue(self, entity, returnfield, **kwargs):
-        """Search entity for field = value, 
-        return single result with single field as unicode string
+    def getvalue(self, entity, returnfield, **kwargs):
+        """Simple implementation of getvalue action.
+        Will only return one field as unicodestring  
+        and expects only one result, as per get single.
         Raises a CiviCRM  error if no or multiple results are found."""
         # TODO OPTIONS?
         kwargs.update({'return' : returnfield})
         return self._get('getvalue', entity, kwargs)
 
-    def create(self, entity, params):
+    def create(self, entity, **kwargs):
         """Simple implementation of create action.
         Returns a list of dictionaries of created entries."""
         # TODO OPTIONS?
-        return self._post('create', entity, params)
+        return self._post('create', entity, kwargs)
         
-    def update(self, entity, db_id, params):
+    def update(self, entity, db_id, **kwargs):
         """Update a record. An id must be supplied.
         Returns a list of dictionaries of updated  entries."""
         # TODO OPTIONS?
-        params.update({'id' : db_id})
-        return self.create(entity, params)
+        return self.create(entity, id=db_id, **kwargs)
 
-    def updatevalues(self, entity, db_id, **kwargs):
-        """update a record using key=value pairs. An id must be supplied.
-        Returns a list of dictionaries of updated  entries."""
-        params = kwargs
-        params.update({'id' : db_id})
-        return self.create(entity, params)
-                
     def setvalue(self, entity, db_id, field, value):
         """Updates a single field.
         This is not well documented, use at own risk.
@@ -254,16 +222,10 @@ class CiviCRM:
             params = {'id' : db_id}
         return self._post('delete', entity, params)
 
-    def getcount(self, entity, params):
+    def getcount(self, entity, **kwargs):
         """Returns the number of qualifying records. Expects a dictionary.
         Mayt not be accurate for values > 25. (will return 25)"""
-        return self._get('getcount', entity, params)
-
-    def getcountkw(self,entity, **kwargs):
-        """Returns the number of qualifying records. Takes key=value pairs.
-        May not be accurate for values > 25. (will return 25)"""
         return self._get('getcount', entity, kwargs)
-        
     
     def getfields(self, entity):
         """Returns a dictionary of fields for entity, where
@@ -280,28 +242,24 @@ class CiviCRM:
         parameters = {'field' : field, 'sequential' : 0}
         return self._get('getoptions', entity, parameters)
 
-    def doaction(self,action ,entity, params=None):
+    def doaction(self,action ,entity, **kwargs):
         """There are other actions for some entities, but
         these are undocumented?. This allows you to utilise
         these. Use with caution."""
-        return self._post(action, entity, params)
+        return self._post(action, entity, kwargs)
 
 
-    def create_contact(self, params):
+    def create_contact(self, contact_type,  **kwargs):
         """Creates a contact from supplied dictionary params.
         Raises a CivicrmError if a required field is not supplied:
         contact_type and/or one of  first_name, last_name, 
         email, display_name. Returns a dictionary of the contact created"""
         required = ['first_name', 'last_name', 'email', 'display_name']
-        missing_fields =  matches_required(required, params)
-        if type(params) is not dict:
-            raise CivicrmError('wrong type supplied, a dict is required')
-        elif not 'contact_type' in params:
-            raise CivicrmError('contact_type must be set')
-        elif missing_fields:
+        missing_fields =  matches_required(required, kwargs)
+        if missing_fields:
             raise CivicrmError('One of the following fields must exist:%s'
                     % ", ".join(missing_fields))
-        return self.create('Contact', params)[0]
+        return self.create('Contact', contact_type=contact_type, **kwargs)[0]
 
     def add_relationship(self, contact_a, contact_b, relationship, 
             **kwargs):
@@ -317,7 +275,6 @@ class CiviCRM:
         you may find it beneficial to check the result for 
         'relationship_type_id' and cache this result.
         Returns a dictionary of the contact created."""
-        params = kwargs
         relationship_id = None
         if type(relationship) is int:
             relationship_id = relationship
@@ -325,18 +282,18 @@ class CiviCRM:
             for field in ['name_a_b', 'label_a_b', 
                     'name_b_a', 'label_b_a', 'description']:
                 result =  self.get('RelationshipType', 
-                        {field : relationship, 'return' : ['id']})
+                        **{field : relationship, 'return' : ['id']})
                 if result:
                     relationship_id = result[0]['id']
                     break
         if not relationship_id:
             raise CivicrmError('invalid relationship %s' % relationship)
-        params.update({
+        kwargs.update({
                     'relationship_type_id' : relationship_id, 
                     'contact_id_a' : contact_a,
                     'contact_id_b' : contact_b
                     })
-        return self.create('Relationship', params)[0]
+        return self.create('Relationship', **kwargs)[0]
 
     def add_activity_type(self, label, weight=5, is_active=0, **kwargs):
         """Creates an Activity Type. Label is a string describing the activity
@@ -345,13 +302,12 @@ class CiviCRM:
         It defaults to 5, this puts things just after the basic types such
         as Phone Call. is_active defaults to 0: disabled (as per CiviCRM.
         Set to 1 to make the Activity Type active""" 
-        params = kwargs
-        params.update({
+        kwargs.update({
                'label' : label,
                'weight': weight,
                'is_active' : is_active
                })
-        return self.create('ActivityType', params)[0]
+        return self.create('ActivityType', **kwargs)[0]
 
     def add_activity(self, label, sourceid,
         subject=None, date_time=None, status=None, **kwargs):
@@ -381,15 +337,14 @@ class CiviCRM:
             sid = status_types[status]
         else:
             raise CivicrmError("invalid status %s" % status) 
-        params = kwargs
-        params.update({
+        kwargs.update({
             'activity_label' : label,
             'source_contact_id' : sourceid,
             'subject' : subject,
             'activity_date_time' : date_time,
             'status_id' : sid
             })
-        return self.create('Activity', params)[0]
+        return self.create('Activity', **kwargs)[0]
 
 def matches_required(required, params):
     """if none of the fields in the list required are in params,
