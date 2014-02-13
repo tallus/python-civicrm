@@ -45,6 +45,24 @@ class MyTests(unittest.TestCase):
         self.assertRaises(CivicrmError, self.cc._check_results,
                 {'is_error' : 1, 'error_message' : 'test', 'result' : 1})
 
+    def test_is_valid_option_id_is_valid(self):
+        result = self.cc.is_valid_option(
+                'Activity', 'activity_is_test', 0)
+        self.assertEquals(result, 0)
+
+    def test_is_valid_option_id_is_not_valid(self):
+        self.assertRaises(CivicrmError, self.cc.is_valid_option,
+            'Activity', 'activity_is_test', 2)
+
+    def test_is_valid_option_label_is_valid(self):
+        result = self.cc.is_valid_option(
+                'Activity', 'activity_is_test', 'Yes')
+        self.assertEquals(result, '1')
+
+    def test_is_valid_option_label_is_not_valid(self):
+        self.assertRaises(CivicrmError, self.cc.is_valid_option,
+            'Activity', 'activity_is_test', 'Not Valid')
+    
     def test__get(self):
         results = self.cc._get('get', 'Contact')
         self.assertGreater(len(results), 1)
@@ -185,13 +203,13 @@ class MyTests(unittest.TestCase):
 
     def test_add_activity_by_status_id(self):
         result = self.cc.add_activity("Meeting", self.contact_id, 
-                subject = "test",status = 2,  is_test=1)
+                subject = "test", status = 2,  is_test=1)
         self.cc.delete('Activity', result['id'], True)
         self.assertEquals(result['activity_type_id'], '1')
     
     def test_add_activity_by_status_type(self):
         result = self.cc.add_activity("Meeting", self.contact_id,
-                subject = "test", status = "completed", is_test=1)
+                subject = "test", activity_status = "completed", is_test=1)
         self.cc.delete('Activity', result['id'], True)
         self.assertEquals(result['activity_type_id'], '1')
 
@@ -209,6 +227,12 @@ class MyTests(unittest.TestCase):
         self.assertRaises(CivicrmError,
             self.cc.add_activity,"Meeting", self.contact_id,
             "test", "0000", "test")
+
+    def test_add_contribution(self):
+        result = self.cc.add_contribution(self.contact_id, 100, 1, is_test=1)
+        self.cc.delete('Contribution', result['id'], True)
+        self.assertEquals(result['total_amount'], '100')
+
 
     def test_matches_required_no_match(self):
         required = ['exists']

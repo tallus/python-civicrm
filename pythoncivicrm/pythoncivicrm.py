@@ -59,6 +59,7 @@ Things to note
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
 * Results are unicode
 * Most actions returns the (updated) record in question, others a count e.g. delete
+* The is_valid_method uses getoptions() to both checks an option is valid and returns the corresponding id (where this is valid). It does this for both an id supplied as an int and a label supplied as a string. This is convinient as it allows methods to take a descriptive label as well as a numeric id, rather than being limited to this. When methods do this they don't use this method if a numeric id is supplied, so that id is not checked for validity (though a Civicrm will still be raised if its not) as it is assumed you know what you are doing in this case, and we can save an extra API call for speed.
 * the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
 """
 
@@ -158,6 +159,26 @@ class CiviCRM:
             return results['result']
         else:
             return results
+
+    def is_valid_option(self, entity, field, value):
+        """Takes a value which can be an id or its corresponding
+        label, Returns the (corresponding) id if valid, otherwise
+        raises a CivicrmError"""
+        # keys are id's
+        try:
+            options = self.getoptions(entity, field)
+        except CivicrmError:
+            raise CivicrmError("%s has no defined options for %s" 
+                    % (entity, field))
+        # swap keys & values for lookup keys are labels
+        labels = dict((value, key) for key, value 
+                in options.iteritems())
+        if type(value) is int and str(value) in options:
+            return value
+        elif type(value) is str and value.capitalize() in labels:
+            return labels[value.capitalize()]
+        else:
+            raise CivicrmError("invalid option %s" % value)
 
    
     def get(self, entity, **kwargs):
@@ -311,42 +332,60 @@ class CiviCRM:
                })
         return self.create('ActivityType', **kwargs)[0]
 
-    def add_activity(self, label, sourceid,
-        subject=None, date_time=None, status=None, **kwargs):
-        """Creates an activity. label is predefined. User
-        defined labels are possible so checking is via the API.
+    def add_activity(self, activity_type, sourceid,
+        subject=None, date_time=None, activity_status=None, 
+        activity_medium = None, priority= None, **kwargs):
+        """Creates an activity. 
+        activity_type, activity_status, activity_medium and priority
+        can all be supplied as a label or id (int). The label 
+        wil be automatically coverted into the corresponding id
+        so activity_type becomes  activity_type_id. Valid values 
+        can be obtained with  the getoptions method e.g. 
+        getoptions('Activity', 'status_id')
+        (This method doesn't take activity_type_name  
+        -- its identical for predefined types.
+        use  the create method  if you insist on using it).
         sourceid is an int, typically the contact_id for
         the person creating the activity, loosely defined.
-        There is aslo a target_contact_id for person contacted etc.
+        There is also a target_contact_id for person contacted etc.
         Subject is a string, typically a summary of the activity. 
         date_time should be string not a datetime object. 
-        Status can be an integer or a string.see the status_types dict."""
-        status_types = {
-            "Scheduled" : 1,
-            "Completed" : 2, 
-            "Cancelled" : 3, 
-            "Left Message" : 4,
-            "Unreachable" : 5,
-            "Not Required" : 6,
-            "Available" : 7,
-            "No-show": 8
-            }
-        if type(status) is str:
-            status = status.capitalize()
-        if type(status) is int and 0 < status < 9:
-            sid = status
-        elif  status in status_types:
-            sid = status_types[status]
-        else:
-            raise CivicrmError("invalid status %s" % status) 
+        It's short hand for 'activity_date_time'."""
+        if type(activity_type) is not int:
+            activity_type = self.is_valid_option(
+                    'Activity', 'activity_type_id', activity_type)
+        kwargs['activity_type_id'] = activity_type
+        # get corresponding id
+        largs =  locals()
+        for option in ['activity_status', 'activity_medium', 'priority']:
+            if largs[option]:
+                val = largs[option]
+                name = option + '_id'
+                if type(val) is not int:
+                    val = self.is_valid_option('Activity', name, val)
+                kwargs[name] = val
         kwargs.update({
-            'activity_label' : label,
             'source_contact_id' : sourceid,
             'subject' : subject,
-            'activity_date_time' : date_time,
-            'status_id' : sid
-            })
+            'activity_date_time' : date_time
+            })          
         return self.create('Activity', **kwargs)[0]
+
+    def add_contribution(self, contact_id, total_amount, 
+            financial_type, **kwargs):
+        """Add a contribution of amount credited to contact_id.
+        financial_type can be an integer or a string corresponding to a 
+        financial types id or value respectively. 
+        This can be obtained with
+        self.getoptions('Contribution', 'financial_type_id')."""
+        if type(financial_type) is not int:
+            financial_type = self.is_valid_option(financial_type)
+        kwargs['financial_type_id'] = financial_type
+        kwargs.update({
+            'contact_id' : contact_id,  
+            'total_amount' : total_amount, 
+        })
+        return self.create('Contribution', **kwargs)[0]
 
 def matches_required(required, params):
     """if none of the fields in the list required are in params,
