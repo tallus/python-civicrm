@@ -209,7 +209,8 @@ class MyTests(unittest.TestCase):
     
     def test_add_activity_by_status_type(self):
         result = self.cc.add_activity("Meeting", self.contact_id,
-                subject = "test", activity_status = "completed", is_test=1)
+                subject = "test", activity_status = "completed", 
+                status = "Cancelled",  is_test=1)
         self.cc.delete('Activity', result['id'], True)
         self.assertEquals(result['activity_type_id'], '1')
 
@@ -233,6 +234,13 @@ class MyTests(unittest.TestCase):
         self.cc.delete('Contribution', result['id'], True)
         self.assertEquals(result['total_amount'], '100')
 
+    def test_add_email(self):
+        result = self.cc.add_email(self.contact_id, 'test@example.org')
+        self.assertEquals(result['email'], 'test@example.org')
+
+    def test_add_email_is_not_email_like(self):
+        self.assertRaises(CivicrmError, self.cc.add_email, 
+            self.contact_id, 'invalid.address', True)
 
     def test_matches_required_no_match(self):
         required = ['exists']

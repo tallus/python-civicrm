@@ -83,6 +83,9 @@ class CiviCRM:
         """Set url,api keys, ssl usage."""
         # strip http(s):// off url 
         regex = re.compile('^https?://')
+        # handwavey email regex
+        self.eml = re.compile(
+                r"^[A-Za-z0-9\.\+_-]+@[A-Za-z0-9\._-]+\.[a-zA-Z]*$")
         self.urlstring = regex.sub('', url)
         self.site_key = site_key
         self.api_key = api_key
@@ -386,6 +389,20 @@ class CiviCRM:
             'total_amount' : total_amount, 
         })
         return self.create('Contribution', **kwargs)[0]
+
+    def add_email(self, contact_id, email, email_like=False,  **kwargs):
+        """Add an email to civicrm. If email_like is True it checks 
+        to see whether the supplied email looks something like a real email,
+        using a typical handwavey regex (specifically  something like 
+        something@something.something so local emails will fail). 
+        A CivicrmError is raised if it fails this "test".
+        No claim is made that this actually is or isn't a valid email, 
+        never mind that you can actually send email to it. 
+        Civicrm doesn't care and will take anything in the field apparently.""" 
+        if email_like and not re.match(self.eml, email):
+            raise CivicrmError("Might not be an email address")
+        return self.create('Email', contact_id=contact_id, email=email,
+                **kwargs)[0]
 
 def matches_required(required, params):
     """if none of the fields in the list required are in params,
