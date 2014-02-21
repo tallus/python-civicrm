@@ -236,11 +236,44 @@ class MyTests(unittest.TestCase):
 
     def test_add_email(self):
         result = self.cc.add_email(self.contact_id, 'test@example.org')
+        self.cc.delete('Email', result['id'], True)
         self.assertEquals(result['email'], 'test@example.org')
 
     def test_add_email_is_not_email_like(self):
         self.assertRaises(CivicrmError, self.cc.add_email, 
             self.contact_id, 'invalid.address', True)
+
+    def test_add_note(self):
+        result = self.cc.add_note(self.contact_id, 'test')
+        self.cc.delete('Note', result['id'], True)
+        self.assertEquals(result['note'], 'test')
+
+    def test_add_tag(self):
+        result = self.cc.add_tag('test')
+        self.cc.delete('Tag', result['id'], True)
+        self.assertEquals(result['name'], 'test')
+
+    def test_add_entity_tag(self):
+        result = self.cc.add_entity_tag(self.contact_id, 1)
+        self.cc.doaction('delete', 'EntityTag', tag_id=1,
+                entity_id=202)
+        self.assertEquals(result['added'], 1)
+
+    def test_add_group(self):
+        result = self.cc.add_group(title='test')
+        self.cc.delete('Group', result['id'], True)
+        self.assertEquals(result['title'], 'test')
+    
+    def test_add_group_contact(self):
+        result = self.cc.add_group_contact(self.contact_id, 5)
+        self.cc.doaction('delete', 'GroupContact', group_id=5,
+                contact_id=self.contact_id)
+        self.assertEquals(result['added'], 1)
+
+    def test_add_phone(self):
+        result = self.cc.add_phone(self.contact_id, '111-111-1111')
+        self.cc.delete('Phone', result['id'], True)
+        self.assertEquals(result['phone'], '111-111-1111')
 
     def test_matches_required_no_match(self):
         required = ['exists']

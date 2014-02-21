@@ -118,7 +118,14 @@ class CiviCRM:
                 raise CivicrmError('request to %s failed with status code %s'
                         % (self.url, api_call.status_code))
         results =  json.loads(api_call.content)
-        return self._check_results(results)
+        #  Some entitys return things in the values field 
+        # that don't conform to the normal use elsewhere
+        # Here we check for this and just return straight results
+        funny_values = ['GroupContact']
+        if entity in funny_values:
+            return results
+        else:
+            return self._check_results(results)
 
         
     def _construct_payload(self, action, entity, parameters):
@@ -239,8 +246,12 @@ class CiviCRM:
     def delete(self, entity, db_id, skip_undelete = False):
         """Delete a record. Set skip_undelete to True, to 
         permanently delete a record for cases  where there
-        is a 'recycle bin' e.g. contacts
-        Returns number of deleted records"""
+        is a 'recycle bin' e.g. contacts.
+        In some cases, e.g. entity_tags entries entries can be deleted
+        without the id (get on entity tags doesn't return the id)
+        In these cases use getaction with delete and the appropriate
+        key=value pairs.
+        Returns number of deleted records."""
         # TODO OPTIONS?
         if skip_undelete is True:
             params = {'id' : db_id, 'skip_undelete': 1}
@@ -403,6 +414,47 @@ class CiviCRM:
             raise CivicrmError("Might not be an email address")
         return self.create('Email', contact_id=contact_id, email=email,
                 **kwargs)[0]
+
+    def add_note(self, entity_id, note, **kwargs):
+        """Add a note . Note if entity_table is not defined,
+        it defaults to civicrm_contact. entity_table refers to the 
+        table name in civicrm database. Other fields are  subject 
+        contact_id (note creator), modified_date and privacy."""
+        return self.create('Note', entity_id=entity_id, note=note,
+                **kwargs)[0]
+
+    def add_tag(self, name, **kwargs):
+        """Add a tag"""
+        return self.create('Tag', name=name, **kwargs)[0]
+    
+    def add_entity_tag(self, entity_id, tag_id, 
+                    entity_table="civicrm_contact"):
+        """Tag an entity_id (a contact id by default) by tag id.
+        Note returns a dict with "is_error,not_added, added, total_count
+        It's not an error to tag an entity with a tag, it just won't
+        get added Iand added and not_added will reflect this.
+        See also notes under delete."""
+        return self.create('EntityTag', entity_id=entity_id,
+                tag_id=tag_id, entity_table=entity_table)
+
+    def add_group(self, title, **kwargs):
+        """Add a group to civicrm"""
+        return self.create('Group', title=title, **kwargs)[0]
+
+    def add_group_contact(self, contact_id, group_id, **kwargs):
+        """Add a link between a group and a contact. See entity_tag
+        for a description of return values (and deleting)."""
+        return self.create('GroupContact', contact_id=contact_id,
+                group_id=group_id) 
+    
+    def add_phone(self, contact_id, phone, **kwargs):
+        """Add a phone number to CiviCRM. phone_type is an int,
+        is_primary defaults to 1(true). phone_numeric is phone number
+        as digits only (no spaces, dashes etc)."""
+        return self.create('Phone', contact_id=contact_id,
+                phone=phone, **kwargs)[0]
+
+
 
 def matches_required(required, params):
     """if none of the fields in the list required are in params,
