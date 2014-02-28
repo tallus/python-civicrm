@@ -185,10 +185,11 @@ class CiviCRM:
                 in options.iteritems())
         if type(value) is int and str(value) in options:
             return value
-        elif type(value) is str and value.capitalize() in labels:
-            return labels[value.capitalize()]
+        elif type(value) is str and value in labels:
+            return labels[value]
         else:
             raise CivicrmError("invalid option %s" % value)
+            #return(labels)
 
    
     def get(self, entity, **kwargs):
@@ -366,9 +367,9 @@ class CiviCRM:
         date_time should be string not a datetime object. 
         It's short hand for 'activity_date_time'."""
         if type(activity_type) is not int:
-            activity_type = self.is_valid_option(
+            activity_type_id = self.is_valid_option(
                     'Activity', 'activity_type_id', activity_type)
-        kwargs['activity_type_id'] = activity_type
+        kwargs['activity_type_id'] = activity_type_id
         # get corresponding id
         largs =  locals()
         for option in ['activity_status', 'activity_medium', 'priority']:

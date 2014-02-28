@@ -209,7 +209,7 @@ class MyTests(unittest.TestCase):
     
     def test_add_activity_by_status_type(self):
         result = self.cc.add_activity("Meeting", self.contact_id,
-                subject = "test", activity_status = "completed", 
+                subject = "test", activity_status = "Completed", 
                 status = "Cancelled",  is_test=1)
         self.cc.delete('Activity', result['id'], True)
         self.assertEquals(result['activity_type_id'], '1')

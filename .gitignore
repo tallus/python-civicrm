@@ -4,11 +4,11 @@ test.db
 test.py
 build*
 dist*
-jsondb.egg-info*
+*.egg-info*
 *.pybundle
 *.py[cod]
 *.log
-
+*.json
 # C extensions
 *.so
 
