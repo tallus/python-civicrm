@@ -366,12 +366,10 @@ class CiviCRM:
         Subject is a string, typically a summary of the activity. 
         date_time should be string not a datetime object. 
         It's short hand for 'activity_date_time'."""
-        if type(activity_type) is int:
-            activity_type_id = activity_type 
-        else:
-            activity_type_id = self.is_valid_option(
+        if type(activity_type) is not int:
+            activity_type = self.is_valid_option(
                     'Activity', 'activity_type_id', activity_type)
-        kwargs['activity_type_id'] = activity_type_id
+        kwargs['activity_type_id'] = activity_type
         # get corresponding id
         largs =  locals()
         for option in ['activity_status', 'activity_medium', 'priority']:
@@ -396,9 +394,11 @@ class CiviCRM:
         This can be obtained with
         self.getoptions('Contribution', 'financial_type_id')."""
         if type(financial_type) is not int:
-            financial_type = self.is_valid_option(financial_type)
-        kwargs['financial_type_id'] = financial_type
+            financial_type = self.is_valid_option('Contribution',
+                    'financial_type_id', financial_type)
+        # kwargs['financial_type_id'] = financial_type
         kwargs.update({
+            'financial_type_id' : financial_type,
             'contact_id' : contact_id,  
             'total_amount' : total_amount, 
         })
@@ -457,6 +457,17 @@ class CiviCRM:
         return self.create('Phone', contact_id=contact_id,
                 phone=phone, **kwargs)[0]
 
+    def add_address(self, contact_id, location_type, **kwargs):
+        """Add an address to civicrm. location_type can be supplied as 
+        numeric id or its equivalent value."""
+        if type(location_type) is not int:
+            location_type = self.is_valid_option('Address',
+                    'location_type_id', location_type)
+        kwargs.update({
+            'contact_id' : contact_id,  
+            'location_type_id' : location_type, 
+        })
+        return self.create('Address', **kwargs)[0]
 
 
 def matches_required(required, params):

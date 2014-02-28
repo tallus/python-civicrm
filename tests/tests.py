@@ -165,19 +165,19 @@ class MyTests(unittest.TestCase):
         results = self.cc.doaction('get', 'Contact')
         self.assertGreater(len(results), 1)
 
-    def test_create_contact(self):
-        results =  self.cc.create_contact(
+    def test_add_contact(self):
+        results =  self.cc.add_contact(
                 contact_type='Individual', display_name='test')
         self.cc.delete('Contact', results['id'], True)
         self.assertEquals(results['display_name'], 'test')
 
-    def test_create_contact_required_field_missing(self):
+    def test_add_contact_required_field_missing(self):
         self.assertRaisesRegexp(CivicrmError, 'fields must exist',
-                self.cc.create_contact, contact_type='Individual')
+                self.cc.add_contact, contact_type='Individual')
     
-    def test_create_contact_wrong_type(self):
+    def test_add_contact_wrong_type(self):
         self.assertRaisesRegexp(CivicrmError,' not a valid option',
-                self.cc.create_contact, 'not a contact type', 
+                self.cc.add_contact, 'not a contact type', 
                 display_name='test')
 
     def test_add_relationship_by_id(self):
@@ -229,10 +229,21 @@ class MyTests(unittest.TestCase):
             self.cc.add_activity,"Meeting", self.contact_id,
             "test", "0000", "test")
 
-    def test_add_contribution(self):
+    def test_add_contribution_by_id(self):
         result = self.cc.add_contribution(self.contact_id, 100, 1, is_test=1)
         self.cc.delete('Contribution', result['id'], True)
         self.assertEquals(result['total_amount'], '100')
+
+    def test_add_contribution_by_type(self):
+        result = self.cc.add_contribution(self.contact_id, 
+                100, 'Donation', is_test=1)
+        self.cc.delete('Contribution', result['id'], True)
+        self.assertEquals(result['total_amount'], '100')
+
+    def test_add_contribution_invalid_financial_type(self):
+        self.assertRaises(CivicrmError,
+                self.cc.add_contribution,self.contact_id,
+                100, 'Not Valid', is_test=1)
 
     def test_add_email(self):
         result = self.cc.add_email(self.contact_id, 'test@example.org')
@@ -274,6 +285,16 @@ class MyTests(unittest.TestCase):
         result = self.cc.add_phone(self.contact_id, '111-111-1111')
         self.cc.delete('Phone', result['id'], True)
         self.assertEquals(result['phone'], '111-111-1111')
+
+    def test_add_address_by_location_type_id(self):
+        result = self.cc.add_address(self.contact_id, 1)
+        self.cc.delete('Address', result['id'], True)
+        self.assertEquals(result['location_type_id'], '1')
+
+    def test_add_address_by_location_type(self):
+        result = self.cc.add_address(self.contact_id, 'Home')
+        self.cc.delete('Address', result['id'], True)
+        self.assertEquals(result['location_type_id'], '1')
 
     def test_matches_required_no_match(self):
         required = ['exists']
