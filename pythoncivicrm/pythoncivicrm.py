@@ -366,7 +366,9 @@ class CiviCRM:
         Subject is a string, typically a summary of the activity. 
         date_time should be string not a datetime object. 
         It's short hand for 'activity_date_time'."""
-        if type(activity_type) is not int:
+        if type(activity_type) is int:
+            activity_type_id = activity_type 
+        else:
             activity_type_id = self.is_valid_option(
                     'Activity', 'activity_type_id', activity_type)
         kwargs['activity_type_id'] = activity_type_id
