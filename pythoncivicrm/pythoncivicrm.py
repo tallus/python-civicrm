@@ -287,7 +287,7 @@ class CiviCRM:
         return self._post(action, entity, kwargs)
 
 
-    def create_contact(self, contact_type,  **kwargs):
+    def add_contact(self, contact_type,  **kwargs):
         """Creates a contact from supplied dictionary params.
         Raises a CivicrmError if a required field is not supplied:
         contact_type and/or one of  first_name, last_name, 
