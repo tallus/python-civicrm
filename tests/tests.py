@@ -63,6 +63,9 @@ class MyTests(unittest.TestCase):
         self.assertRaises(CivicrmError, self.cc.is_valid_option,
             'Activity', 'activity_is_test', 'Not Valid')
     
+    def test_is_valid_option_label_is_none(self):
+        self.assertRaises(CivicrmError, self.cc.is_valid_option,
+            'Activity', 'activity_is_test', None)
     def test__get(self):
         results = self.cc._get('get', 'Contact')
         self.assertGreater(len(results), 1)

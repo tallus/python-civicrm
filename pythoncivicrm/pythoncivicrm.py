@@ -185,7 +185,7 @@ class CiviCRM:
                 in options.iteritems())
         if type(value) is int and str(value) in options:
             return value
-        elif type(value) is str and value in labels:
+        elif value in labels:
             return labels[value]
         else:
             raise CivicrmError("invalid option %s" % value)
