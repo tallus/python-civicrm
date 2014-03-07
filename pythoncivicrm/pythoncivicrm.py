@@ -153,7 +153,7 @@ class CiviCRM:
         """adds limit and offset etc in form required by REST API
         Takes key=value pairs and/or a dictionary(kwlist) 
         in addition to a parameter dictionary to extend"""
-        for key, value in kwargs.iteritems():
+        for key, value in kwargs.items():
             if value:
                 option = "options[%s]" % key
                 params.update({option : value})
@@ -182,7 +182,7 @@ class CiviCRM:
                     % (entity, field))
         # swap keys & values for lookup keys are labels
         labels = dict((value, key) for key, value 
-                in options.iteritems())
+                in options.items())
         if type(value) is int and str(value) in options:
             return value
         elif value in labels:
