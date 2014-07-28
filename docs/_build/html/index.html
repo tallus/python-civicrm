@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -15,7 +13,7 @@
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
-        URL_ROOT:    '',
+        URL_ROOT:    './',
         VERSION:     '0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
@@ -52,23 +50,22 @@
 <ul class="simple">
 </ul>
 </div>
-<span class="target" id="module-pythoncivicrm"></span><div class="section" id="python-civicrm">
+<span class="target" id="module-pythoncivicrm"></span><p>:synopis:Python module to access the CiviCRM v3 API.</p>
+<div class="section" id="python-civicrm">
 <h2>Python CiviCRM<a class="headerlink" href="#python-civicrm" title="Permalink to this headline">¶</a></h2>
 <p>This is a module for interacting with the CiviCRM REST API Version 3.</p>
 <p>It&#8217;s use should be fairly straight forward, at least if you have basic 
 familiarity with the API documentation.</p>
-<p>Everything is implemented in the CiviCRM class. You need, at a minimum
-to pass a URL, and the your site and API keys when instantiating your 
-object.</p>
-<p>This class has methods that correspond to nearly all the underlying 
-actions provided by the REST API, as well as implementing a few more of 
-its own. Some of these are more convenient and/or simpler versions 
-of the actions. Others provide for more complex or specific tasks e.g. 
-adding a contact. The eventual aim is to match the functionality provided
-in the PHP API.</p>
-<p>There are some differences in how things are implemented, in particular 
-with how things are returned. See <a class="reference internal" href="#things-to-note"><em>Things to note</em></a>.</p>
-<p>A CivicrmError will be raised for anything other than a 200 respose e.g. 404</p>
+<p>Everything is implemented in the CiviCRM class. You need, at a minimum to pass a
+URL, and the your site and API keys when instantiating your object.</p>
+<p>This class has methods that correspond to nearly all the underlying actions
+provided by the REST API, as well as implementing a few more of its own. Some of
+these are more convenient and/or simpler versions of the actions. Others provide
+for more complex or specific tasks e.g. adding a contact. The eventual aim is to
+match the functionality provided in the PHP API.</p>
+<p>There are some differences in how things are implemented, in particular with how
+things are returned. See <a class="reference internal" href="#things-to-note"><em>Things to note</em></a>.</p>
+<p>A CivicrmError will be raised for anything other than a 200 respose e.g. a 404.</p>
 <div class="section" id="usage">
 <h3>Usage<a class="headerlink" href="#usage" title="Permalink to this headline">¶</a></h3>
 <p>Usage example for a basic search:</p>
@@ -82,41 +79,82 @@ with how things are returned. See <a class="reference internal" href="#things-to
         <span class="n">city</span><span class="o">=</span><span class="s">&#39;Gotham City&#39;</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>It can be easier to construct a dict and feed them to methods using ** to expand it to key value pairs:</p>
-<div class="highlight-python"><pre>my_dict =   {
-            country' : 'United States', 
-            city='Gotham City', 
-            contact_type='Individual
+<p>It can be easier to construct a dict and feed them to methods using ** to
+expand it to key value pairs:</p>
+<div class="highlight-python"><div class="highlight"><pre>my_dict =   {
+            country      = &#39;United States&#39;,
+            city         =&#39;Gotham City&#39;,
+            contact_type =&#39;Individual
             }
-civicrm.get('Contact', **my_dict)</pre>
+civicrm.get(&#39;Contact&#39;, **my_dict)
+</pre></div>
 </div>
 </div>
 <div class="section" id="things-to-note">
 <span id="id1"></span><h3>Things to note<a class="headerlink" href="#things-to-note" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Of the options defined in the CiviCRM API <a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters</a> &lt;a href=http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters&#8221;&gt;here&lt;/a&gt; only limit, offset (&amp; sequential) are currently supported, sequential is set to 1 (true) by default and should not generally be changed .</li>
-<li>Entity and Action must always be specified explicitly. They are removed if found in params, along with references to site/api keys.</li>
-<li>The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves &#8211; typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().</li>
-<li>Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields &amp; getoptions that return  a dictionary with real keys.</li>
-<li>Results are unicode</li>
-<li>Most actions returns the (updated) record in question, others a count e.g. delete</li>
-<li>the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.</li>
+<li>Of the options defined in the CiviCRM API</li>
 </ul>
+<p><a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+</a> the+API#UsingtheAPI-
+Parameters only limit, offset (&amp; sequential) are currently supported,
+sequential is set to 1 (true) by default and should not generally be changed.</p>
+<ul class="simple">
+<li>Entity and Action must always be specified explicitly. They are removed if</li>
+</ul>
+<p>found in params, along with references to site/api keys.</p>
+<ul class="simple">
+<li>The CiviCRM API typically returns JSON (that would decode to a dictionary)</li>
+</ul>
+<p>with the actual results you want stored in values(or result if a single  value
+is expected). Additional info is typically API version and count. If  results
+are returned successfully we only return the results themselves &#8211;  typically a
+list of dictionaries, as this API version is always 3 with this  module, and
+count can easily be derived using len().</p>
+<ul class="simple">
+<li>Returned values are generally sequential (i.e. a list (of dictionaries) rather</li>
+</ul>
+<p>than a dictionary (of dictionaries) with numbers for keys) except in the case of
+getfields &amp; getoptions that return  a dictionary with real keys.</p>
+<ul class="simple">
+<li>Results are unicode</li>
+<li>Most actions returns the (updated) record in question, others a count e.g.</li>
+<li>delete</li>
+<li>The is_valid_method uses getoptions() to both checks an option is valid and</li>
+</ul>
+<p>returns the corresponding id (where this is valid). It does this for both an id
+supplied as an int and a label supplied as a string. This is convinient as it
+allows methods to take a descriptive label as well as a numeric id, rather than
+being limited to this. When methods do this they don&#8217;t use this method if a
+numeric id is supplied, so that id is not checked for validity (though a Civicrm
+will still be raised if its not) as it is assumed you know what you are doing in
+this case, and we can save an extra API call for speed.</p>
+<ul class="simple">
+<li>The  replace API call is undocumented, AFAIK, so not implemented, use</li>
+</ul>
+<p>getaction if you must.</p>
 <dl class="class">
 <dt id="pythoncivicrm.CiviCRM">
 <em class="property">class </em><tt class="descclassname">pythoncivicrm.</tt><tt class="descname">CiviCRM</tt><big>(</big><em>url</em>, <em>site_key</em>, <em>api_key</em>, <em>use_ssl=True</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM" title="Permalink to this definition">¶</a></dt>
 <dd><p>make calls against the civicrm api</p>
 <dl class="method">
 <dt id="pythoncivicrm.CiviCRM.add_activity">
-<tt class="descname">add_activity</tt><big>(</big><em>label</em>, <em>sourceid</em>, <em>subject=None</em>, <em>date_time=None</em>, <em>status=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_activity" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates an activity. label is predefined. User
-defined labels are possible so checking is via the API.
+<tt class="descname">add_activity</tt><big>(</big><em>activity_type</em>, <em>sourceid</em>, <em>subject=None</em>, <em>date_time=None</em>, <em>activity_status=None</em>, <em>activity_medium=None</em>, <em>priority=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_activity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates an activity. 
+activity_type, activity_status, activity_medium and priority
+can all be supplied as a label or id (int). The label 
+wil be automatically coverted into the corresponding id
+so activity_type becomes  activity_type_id. Valid values 
+can be obtained with  the getoptions method e.g. 
+getoptions(&#8216;Activity&#8217;, &#8216;status_id&#8217;)
+(This method doesn&#8217;t take activity_type_name  
+&#8211; its identical for predefined types.
+use  the create method  if you insist on using it).
 sourceid is an int, typically the contact_id for
 the person creating the activity, loosely defined.
-There is aslo a target_contact_id for person contacted etc.
+There is also a target_contact_id for person contacted etc.
 Subject is a string, typically a summary of the activity. 
 date_time should be string not a datetime object. 
-Status can be an integer or a string.see the status_types dict.</p>
+It&#8217;s short hand for &#8216;activity_date_time&#8217;.</p>
 </dd></dl>
 
 <dl class="method">
@@ -128,6 +166,85 @@ affects the order in which things are displayed in the web interface.
 It defaults to 5, this puts things just after the basic types such
 as Phone Call. is_active defaults to 0: disabled (as per CiviCRM.
 Set to 1 to make the Activity Type active</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_address">
+<tt class="descname">add_address</tt><big>(</big><em>contact_id</em>, <em>location_type</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_address" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an address to civicrm. location_type can be supplied as 
+numeric id or its equivalent value.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_contact">
+<tt class="descname">add_contact</tt><big>(</big><em>contact_type</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a contact from supplied dictionary params.
+Raises a CivicrmError if a required field is not supplied:
+contact_type and/or one of  first_name, last_name, 
+email, display_name. Returns a dictionary of the contact created</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_contribution">
+<tt class="descname">add_contribution</tt><big>(</big><em>contact_id</em>, <em>total_amount</em>, <em>financial_type</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_contribution" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a contribution of amount credited to contact_id.
+financial_type can be an integer or a string corresponding to a 
+financial types id or value respectively. 
+This can be obtained with
+self.getoptions(&#8216;Contribution&#8217;, &#8216;financial_type_id&#8217;).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_email">
+<tt class="descname">add_email</tt><big>(</big><em>contact_id</em>, <em>email</em>, <em>email_like=False</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an email to civicrm. If email_like is True it checks 
+to see whether the supplied email looks something like a real email,
+using a typical handwavey regex (specifically  something like 
+<a class="reference external" href="mailto:something&#37;&#52;&#48;something&#46;something">something<span>&#64;</span>something<span>&#46;</span>something</a> so local emails will fail). 
+A CivicrmError is raised if it fails this &#8220;test&#8221;.
+No claim is made that this actually is or isn&#8217;t a valid email, 
+never mind that you can actually send email to it. 
+Civicrm doesn&#8217;t care and will take anything in the field apparently.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_entity_tag">
+<tt class="descname">add_entity_tag</tt><big>(</big><em>entity_id</em>, <em>tag_id</em>, <em>entity_table=u'civicrm_contact'</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_entity_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tag an entity_id (a contact id by default) by tag id.
+Note returns a dict with &#8220;is_error,not_added, added, total_count
+It&#8217;s not an error to tag an entity with a tag, it just won&#8217;t
+get added Iand added and not_added will reflect this.
+See also notes under delete.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_group">
+<tt class="descname">add_group</tt><big>(</big><em>title</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_group" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a group to CiviCRM.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_group_contact">
+<tt class="descname">add_group_contact</tt><big>(</big><em>contact_id</em>, <em>group_id</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_group_contact" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a link between a group and a contact. See entity_tag
+for a description of return values (and deleting).</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_note">
+<tt class="descname">add_note</tt><big>(</big><em>entity_id</em>, <em>note</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_note" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a note . Note if entity_table is not defined,
+it defaults to civicrm_contact. entity_table refers to the 
+table name in civicrm database. Other fields are  subject 
+contact_id (note creator), modified_date and privacy.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_phone">
+<tt class="descname">add_phone</tt><big>(</big><em>contact_id</em>, <em>phone</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_phone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a phone number to CiviCRM. phone_type is an int,
+is_primary defaults to 1(true). phone_numeric is phone number
+as digits only (no spaces, dashes etc).</p>
 </dd></dl>
 
 <dl class="method">
@@ -148,6 +265,12 @@ Returns a dictionary of the contact created.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pythoncivicrm.CiviCRM.add_tag">
+<tt class="descname">add_tag</tt><big>(</big><em>name</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.add_tag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a tag.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pythoncivicrm.CiviCRM.create">
 <tt class="descname">create</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.create" title="Permalink to this definition">¶</a></dt>
 <dd><p>Simple implementation of create action.
@@ -155,21 +278,15 @@ Returns a list of dictionaries of created entries.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="pythoncivicrm.CiviCRM.create_contact">
-<tt class="descname">create_contact</tt><big>(</big><em>contact_type</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.create_contact" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates a contact from supplied dictionary params.
-Raises a CivicrmError if a required field is not supplied:
-contact_type and/or one of  first_name, last_name, 
-email, display_name. Returns a dictionary of the contact created</p>
-</dd></dl>
-
-<dl class="method">
 <dt id="pythoncivicrm.CiviCRM.delete">
 <tt class="descname">delete</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>skip_undelete=False</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.delete" title="Permalink to this definition">¶</a></dt>
-<dd><p>Delete a record. Set skip_undelete to True, to 
-permanently delete a record for cases  where there
-is a &#8216;recycle bin&#8217; e.g. contacts
-Returns number of deleted records</p>
+<dd><p>Delete a record. Set skip_undelete to True, to permanently
+delete a record for cases  where there is a &#8216;recycle bin&#8217; 
+e.g. contacts.
+In some cases, e.g. entity_tags entries entries can be deleted
+without the id (get on entity tags doesn&#8217;t return the id). In these 
+cases use getaction with delete and the appropriate key-value pairs.
+Returns the number of deleted records.</p>
 </dd></dl>
 
 <dl class="method">
@@ -188,7 +305,8 @@ Supply search terms in a dictionary called params
 Pass limit and offset for a subset of the results
 (or pass them in  params). Other options can also be passed
 as key=value pairs (options as defined here:
-<a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API#UsingtheAPI-Parameters</a> e.g. match, match mandatory.
+<a class="reference external" href="http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API">http://wiki.civicrm.org/confluence/display/CRMDOC/Using+the+API</a>
+#UsingtheAPI-Parameters e.g. match, match mandatory.
 Returns a list of dictionaries or an empty list.</p>
 </dd></dl>
 
@@ -196,7 +314,7 @@ Returns a list of dictionaries or an empty list.</p>
 <dt id="pythoncivicrm.CiviCRM.getcount">
 <tt class="descname">getcount</tt><big>(</big><em>entity</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getcount" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the number of qualifying records. Expects a dictionary.
-Mayt not be accurate for values &gt; 25. (will return 25)</p>
+Mayt not be accurate for values &gt; 25. (will return 25).</p>
 </dd></dl>
 
 <dl class="method">
@@ -204,7 +322,7 @@ Mayt not be accurate for values &gt; 25. (will return 25)</p>
 <tt class="descname">getfields</tt><big>(</big><em>entity</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.getfields" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a dictionary of fields for entity, where
 keys (and key[&#8216;name&#8217;]) are names of field and the value
-is a dictionary describing that field</p>
+is a dictionary describing that field.</p>
 </dd></dl>
 
 <dl class="method">
@@ -214,7 +332,7 @@ is a dictionary describing that field</p>
 as key/value pairs. Typically identical to each other.
 (though sometimes appear to be synonyms? e.g. 1: Yes)
 Raises CivicrmError if a field has no associated options 
-or is not present etc</p>
+or is not present etc.</p>
 </dd></dl>
 
 <dl class="method">
@@ -235,10 +353,17 @@ Raises a CiviCRM  error if no or multiple results are found.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="pythoncivicrm.CiviCRM.is_valid_option">
+<tt class="descname">is_valid_option</tt><big>(</big><em>entity</em>, <em>field</em>, <em>value</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.is_valid_option" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a value which can be an id or its corresponding
+label, Returns the (corresponding) id if valid, otherwise
+raises a CivicrmError.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="pythoncivicrm.CiviCRM.setvalue">
 <tt class="descname">setvalue</tt><big>(</big><em>entity</em>, <em>db_id</em>, <em>field</em>, <em>value</em><big>)</big><a class="headerlink" href="#pythoncivicrm.CiviCRM.setvalue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Updates a single field.
-This is not well documented, use at own risk.
+<dd><p>Updates a single field. This is not well documented, use at own risk.
 Takes an id and single field and value, 
 returns a dictionary with the updated field and record.</p>
 </dd></dl>
@@ -317,7 +442,7 @@ returns a list of missing fields, or None</p>
     </div>
     <div class="footer">
         &copy; Copyright 2013, Paul Munday.
-      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
     </div>
   </body>
 </html>
