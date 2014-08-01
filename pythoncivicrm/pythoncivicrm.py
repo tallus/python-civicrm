@@ -167,7 +167,7 @@ class CiviCRM:
             'json': 1,
             'entity': entity,
             'action': action
-            'fnName': "civicrm/%s/%s" % (entity, action)
+            #'fnName': "civicrm/%s/%s" % (entity, action)
         }
         # these should all be set explicitly so remove from parameters
         for badparam in ['site_key', 'api_key', 'entity', 'action', 'json']:
