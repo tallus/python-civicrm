@@ -166,7 +166,7 @@ class CiviCRM:
             'api_key': self.api_key,
             'json': 1,
             'entity': entity,
-            'action': action
+            'action': action,
             'fnName': "civicrm/%s/%s" % (entity, action)
         }
         # these should all be set explicitly so remove from parameters
