@@ -129,7 +129,7 @@ class CiviCRM:
 
         if not parameters:
             parameters = {}
-        payload = self._construct_payload(action, entity, parameters)
+        payload = self._construct_url_payload(action, entity, parameters)
         api_call = requests.get(self.url, params=payload)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
@@ -142,8 +142,8 @@ class CiviCRM:
 
         if not parameters:
             parameters = {}
-        payload = self._construct_payload(action, entity, parameters)
-        api_call = requests.post(self.url, params=payload)
+        postdata = self._construct_post_data(action, entity, parameters)
+        api_call = requests.post(self.url, data=postdata)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
                         % (self.url, api_call.status_code))
@@ -157,9 +157,8 @@ class CiviCRM:
         else:
             return self._check_results(results)
 
-    def _construct_payload(self, action, entity, parameters):
-        """Takes action, entity, parameters
-        returns  payload(sanitized parameters)."""
+    def _payload_template(self, action, entity):
+        """Return the base payload items."""
 
         payload = {
             'key': self.site_key,
@@ -169,15 +168,38 @@ class CiviCRM:
             'action': action,
             'fnName': "civicrm/%s/%s" % (entity, action)
         }
-        # these should all be set explicitly so remove from parameters
-        for badparam in ['site_key', 'api_key', 'entity', 'action', 'json']:
+        return payload
+
+    def _filter_merge_payload(self, parameters, payload, notparams):
+        """
+        Some parameters should be set explicitly, or not present, so remove them.
+        Parameter 'sequential' must be set one way or another.
+        """
+        for badparam in notparams:
             parameters.pop(badparam, None)
         # add in parameters
         payload.update(parameters)
         # add sequential:1 if not set (override with sequential:0)
         if not 'sequential' in payload:
-                payload['sequential'] = 1
+            payload['sequential'] = 1
         return payload
+
+    def _construct_url_payload(self, action, entity, parameters):
+        """
+        Takes action, entity, parameters returns payload for the URL.
+        """
+        payload = self._payload_template(action, entity)
+        # The body_X are here because they represent files which are likely to result
+        # in url too long errors.
+        notparams = ['site_key', 'api_key', 'entity', 'action', 'json', 'body_html', 'body_text']
+        return self._filter_merge_payload(parameters, payload, notparams)
+
+    def _construct_post_data(self, action, entity, parameters):
+        """From the parameters dictionary, return the POST data payload."""
+
+        payload = self._payload_template(action, entity)
+        notparams = ['site_key', 'api_key', 'entity', 'action', 'json']
+        return self._filter_merge_payload(parameters, payload, notparams)
 
     def _add_options(self, params, **kwargs):
         """Adds limit and offset etc in form required by REST API
