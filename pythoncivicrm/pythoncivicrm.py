@@ -125,7 +125,7 @@ class CiviCRM:
         self.url =  "%s%s/extern/rest.php" % (start, self.urlstring)
 
     def _get(self, action, entity, parameters=None):
-        """Internal method to make api calls"""
+        """Internal method to make api calls using GET."""
 
         if not parameters:
             parameters = {}
@@ -133,12 +133,12 @@ class CiviCRM:
         api_call = requests.get(self.url, params=payload)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
-                        % (self.url, api_call.status_code))
+                                   % (self.url, api_call.status_code))
         results =  json.loads(api_call.content)
         return self._check_results(results)
 
     def _post(self, action, entity, parameters=None):
-        """Internal method to make api calls"""
+        """Internal method to make api calls using POST."""
 
         if not parameters:
             parameters = {}
@@ -146,7 +146,7 @@ class CiviCRM:
         api_call = requests.post(self.url, data=postdata)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
-                        % (self.url, api_call.status_code))
+                                   % (self.url, api_call.status_code))
         results = json.loads(api_call.content)
         # Some entities return things in the values field
         # that don't conform to the normal use elsewhere
@@ -158,8 +158,11 @@ class CiviCRM:
             return self._check_results(results)
 
     def _payload_template(self, action, entity):
-        """Return the base payload items."""
-
+        """Return the base payload items.
+        :param action: What to do with the payload - such as create, delete etc.
+        :param entity: Which  CiviCRM module to reference.
+        :return: A template dictionary of k-v pairs.
+        """
         payload = {
             'key': self.site_key,
             'api_key': self.api_key,
@@ -174,6 +177,11 @@ class CiviCRM:
         """
         Some parameters should be set explicitly, or not present, so remove them.
         Parameter 'sequential' must be set one way or another.
+
+        :param parameters: dictionary of key-value pairs to include in the request.
+        :param payload: dictionary of key-value pairs to which parameters are added.
+        :param notparams: array of keys to be excluded from parameters.
+        :return: The updated version of original payload.
         """
         for badparam in notparams:
             parameters.pop(badparam, None)
@@ -186,26 +194,38 @@ class CiviCRM:
 
     def _construct_url_payload(self, action, entity, parameters):
         """
-        Takes action, entity, parameters returns payload for the URL.
+        Takes action, entity, parameters returns payload suitable for a URL.
+        body_html and body_text parameters are removed as being very likely
+        to exceed the maximum URL length limits. Use POST instead.
+
+        :param action: What to do with the payload - such as create, delete, getsingle etc.
+        :param entity: Which  CiviCRM module to reference.
+        :param parameters: An dictionary of key-value pairs to include in the request.
+        :return: A dictionary of k-v pairs to send to the server in the request.
         """
         payload = self._payload_template(action, entity)
-        # The body_X are here because they represent files which are likely to result
-        # in url too long errors.
         notparams = ['site_key', 'api_key', 'entity', 'action', 'json', 'body_html', 'body_text']
         return self._filter_merge_payload(parameters, payload, notparams)
 
     def _construct_post_data(self, action, entity, parameters):
-        """From the parameters dictionary, return the POST data payload."""
+        """
+        Takes action, entity, parameters returns a payload suitable for a POST.
 
+        :param action: What to do with the payload - such as create, delete, getsingle etc.
+        :param entity: Which  CiviCRM module to reference.
+        :param parameters: An dictionary of key-value pairs to include in the request.
+        :return: A dictionary of k-v pairs to send to the server in the request.
+        """
         payload = self._payload_template(action, entity)
         notparams = ['site_key', 'api_key', 'entity', 'action', 'json']
         return self._filter_merge_payload(parameters, payload, notparams)
 
     def _add_options(self, params, **kwargs):
-        """Adds limit and offset etc in form required by REST API
-        Takes key=value pairs and/or a dictionary(kwlist) 
-        in addition to a parameter dictionary to extend."""
-
+        """
+        Adds limit and offset etc. keys in form required by REST API
+        Takes key=value pairs from dictionary kwargs  and uses them
+        to extend the params dictionary.
+        """
         for key, value in kwargs.items():
             if value:
                 option = "options[%s]" % key
@@ -213,7 +233,7 @@ class CiviCRM:
         return params
 
     def _check_results(self, results):
-        """returns relevant part of results or raise error"""
+        """Returns relevant part of results or raise error"""
 
         if 'is_error' in results and results['is_error'] == 1:
             raise CivicrmError(results['error_message'])
