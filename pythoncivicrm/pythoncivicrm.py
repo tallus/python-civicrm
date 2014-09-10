@@ -167,7 +167,7 @@ class CiviCRM:
             'json': 1,
             'entity': entity,
             'action': action
-            #'fnName': "civicrm/%s/%s" % (entity, action)
+            # 'fnName': "civicrm/%s/%s" % (entity, action)
         }
         # these should all be set explicitly so remove from parameters
         for badparam in ['site_key', 'api_key', 'entity', 'action', 'json']:
@@ -175,7 +175,7 @@ class CiviCRM:
         # add in parameters
         payload.update(parameters)
         # add (not) sequential if not set
-        if not 'sequential' in payload:
+        if 'sequential' not in payload:
             payload['sequential'] = 1
         return payload
 
