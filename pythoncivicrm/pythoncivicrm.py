@@ -47,6 +47,22 @@ expand it to key value pairs::
                 }
     civicrm.get('Contact', **my_dict)
 
+The following optional values can be supplied when intializing:
+    use_ssl=True/False      Connect over https not http, defaults to True.
+    timeout=N               Connection will time out in N seconds, i.e if
+                            no response is sent by the server in N seconds.
+                            requests.exceptions.Timeout will be raised if
+                            the connection timesout.
+                            Defaults to None, this means the connection will
+                            hang until closed.
+
+e.g.
+    url = 'www.example.org/path/to/civi/codebase/civicrm/extern/rest.php'
+    site_key ='your site key'
+    api_key ='your api key'
+    civicrm = CiviCRM(url, site_key, api_key, timeout=5)
+
+    Connections will timeout after 5 seconds, and raise an error.
 
 .. _things-to-note:
 
@@ -103,12 +119,12 @@ class CivicrmError(Exception):
 
 class CiviCRM:
     """
-    .. class::CiviCRM(self, url, site_key, api_key, [use_ssl=True])
-    make calls against the civicrm api
+    .. class::CiviCRM(self, url, site_key, api_key,[use_ssl=True], [timeout=None])
+    Make calls against the Civicrm API.
     """
 
-    def __init__(self, url, site_key, api_key, use_ssl=True):
-        """Set url,api keys, ssl usage."""
+    def __init__(self, url, site_key, api_key, use_ssl=True, timeout=None):
+        """Set url,api keys, ssl usage, timeout"""
 
         # strip http(s):// off url
         regex = re.compile('^https?://')
@@ -118,6 +134,7 @@ class CiviCRM:
         self.site_key = site_key
         self.api_key = api_key
         self.use_ssl = use_ssl
+        self.timeout = timeout
         if self.use_ssl:
             start = 'https://'
         else:
@@ -130,7 +147,7 @@ class CiviCRM:
         if not parameters:
             parameters = {}
         payload = self._construct_payload(action, entity, parameters)
-        api_call = requests.get(self.url, params=payload)
+        api_call = requests.get(self.url, params=payload, timeout=self.timeout)
         if api_call.status_code != 200:
             raise CivicrmError('request to %s failed with status code %s'
                                % (self.url, api_call.status_code))
@@ -143,7 +160,7 @@ class CiviCRM:
         if not parameters:
             parameters = {}
         payload = self._construct_payload(action, entity, parameters)
-        api_call = requests.post(self.url, params=payload)
+        api_call = requests.post(self.url, params=payload, timeout=self.timeout)
         if api_call.status_code != 200:
             raise CivicrmError('request to %s failed with status code %s'
                                % (self.url, api_call.status_code))
