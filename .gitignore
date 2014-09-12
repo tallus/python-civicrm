@@ -48,3 +48,4 @@ extract*
 .ipynb_checkpoints/
 *.ipynb
 
+clean.py
