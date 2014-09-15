@@ -49,3 +49,4 @@ extract*
 *.ipynb
 
 clean.py
+.venv

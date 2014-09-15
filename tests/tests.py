@@ -13,7 +13,7 @@ class MyTests(unittest.TestCase):
         url = "%s/drupal7/sites/all/modules/civicrm/" % ip
         site_key = '371cfadc834d2784a35e4f4ab20c1316'
         api_key = 'b734df56706432bb514ed737465424c3'
-        self.cc = CiviCRM(url, site_key, api_key, use_ssl=False)
+        self.cc = CiviCRM(url, site_key, api_key, timeout=1, use_ssl=False)
         self.contact_id = 202 # id for a valid civicrm user
 
     def tearDown(self):

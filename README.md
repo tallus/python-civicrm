@@ -33,9 +33,25 @@ Use example for a basic search::
 
 
     search_results = civicrm.get('Contact', city='Gotham City')
-    first_10_search_results = civicrm.get('Contact', 
+    first_10_search_results = civicrm.get('Contact',
             city='Gotham City', limit=10)
 
+The following optional values can be supplied when intializing:
+    use_ssl=True/False      Connect over https not http, defaults to True.
+    timeout=N               Connection will time out in N seconds, i.e if
+                            no response is sent by the server in N seconds.
+                            requests.exceptions.Timeout will be raised if
+                            the connection timesout.
+                            Defaults to None, this means the connection will
+                            hang until closed.
+
+e.g.
+    url = 'www.example.org/path/to/civi/codebase/civicrm/extern/rest.php'
+    site_key ='your site key'
+    api_key ='your api key'
+    civicrm = CiviCRM(url, site_key, api_key, timeout=5)
+
+    Connections will timeout after 5 seconds, and raise an error.
 Things to note
 --------------
 
