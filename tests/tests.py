@@ -31,8 +31,14 @@ class MyTests(unittest.TestCase):
         results = self.cc._add_options({}, limit=1)
         self.assertEquals(len(results), 1)
 
-    def test__construct_payload(self):
-        payload = self.cc._construct_payload('get', 'Contact',
+    def test__construct_url_payload(self):
+        payload = self.cc._construct_url_payload('get', 'Contact',
+                {'json' : 0, 'contact_id': 2})
+        self.assertEquals(payload['json'], 1)
+        self.assertEquals(payload['contact_id'], 2)
+
+    def test__construct_post_data(self):
+        payload = self.cc._construct_post_data('post', 'Contact',
                 {'json' : 0, 'contact_id': 2})
         self.assertEquals(payload['json'], 1)
         self.assertEquals(payload['contact_id'], 2)
