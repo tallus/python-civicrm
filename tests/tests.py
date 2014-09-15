@@ -129,7 +129,6 @@ class MyTests(unittest.TestCase):
     def test_create(self):
         results = self.cc.create('Contact',
                 contact_type='individual', display_name='bar, foo')
-        print(results)
         self.cc.delete('Contact', results[0]['id'], True)
         self.assertEquals(results[0]['display_name'], 'bar, foo')
 
