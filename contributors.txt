@@ -1,0 +1,2 @@
+Paul Munday - https://github.com/tallus/python-civicrm
+Ruth Ivimey-Cook - https://github.com/rivimey
