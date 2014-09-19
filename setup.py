@@ -1,12 +1,14 @@
-from setuptools import setup, find_packages
+from setuptools import setup
 
 setup(
-    name='python-civicrm',
+    name='pythoncivicrm',
     version='1.0',
     install_requires=[
         "requests",
     ],
-    packages=find_packages(exclude=['docs', 'tests']),
+    packages=[
+        "pythoncivicrm",
+    ],
     url='https://github.com/tallus/python-civicrm',
     license='GPL',
     author='Paul Munday (tallus)',
