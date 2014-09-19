@@ -143,7 +143,7 @@ class CiviCRM:
             start = 'https://'
         else:
             start = 'http://'
-        self.url =  "%s%s/extern/rest.php" % (start, self.urlstring)
+        self.url = "%s%s/extern/rest.php" % (start, self.urlstring)
 
     def _get(self, action, entity, parameters=None):
         """Internal method to make api calls using GET."""
@@ -153,9 +153,9 @@ class CiviCRM:
         payload = self._construct_url_payload(action, entity, parameters)
         api_call = requests.get(self.url, params=payload, timeout=self.timeout)
         if api_call.status_code != 200:
-                raise CivicrmError('request to %s failed with status code %s'
-                        % (self.url, api_call.status_code))
-        results =  json.loads(api_call.content)
+            raise CivicrmError('request to %s failed with status code %s'
+                               % (self.url, api_call.status_code))
+        results = json.loads(api_call.content)
         return self._check_results(results)
 
     def _post(self, action, entity, parameters=None):
@@ -168,8 +168,8 @@ class CiviCRM:
             self.url, data=postdata, timeout=self.timeout
         )
         if api_call.status_code != 200:
-                raise CivicrmError('request to %s failed with status code %s'
-                        % (self.url, api_call.status_code))
+            raise CivicrmError('request to %s failed with status code %s'
+                               % (self.url, api_call.status_code))
         results = json.loads(api_call.content)
         # Some entities return things in the values field
         # that don't conform to the normal use elsewhere
@@ -197,7 +197,7 @@ class CiviCRM:
         return payload
 
     # def _add_options(self, params, **kwargs):
-    #     """Adds limit and offset etc in form required by REST API
+    # """Adds limit and offset etc in form required by REST API
     #     Takes key=value pairs and/or a dictionary(kwlist)
     #     in addition to a parameter dictionary to extend."""
     #         'action': action,
@@ -275,10 +275,10 @@ class CiviCRM:
             options = self.getoptions(entity, field)
         except CivicrmError:
             raise CivicrmError("%s has no defined options for %s"
-                    % (entity, field))
+                               % (entity, field))
         # swap keys & values for lookup keys are labels
         labels = dict((value, key) for key, value
-                in options.items())
+                      in options.items())
         if type(value) is int and str(value) in options:
             return value
         elif value in labels:
@@ -347,7 +347,7 @@ class CiviCRM:
                 'id': db_id,
                 'field': field,
                 'value': value
-                }
+            }
         )
 
     def delete(self, entity, db_id, skip_undelete=False):
@@ -396,17 +396,17 @@ class CiviCRM:
         """
         return self._post(action, entity, kwargs)
 
-    def add_contact(self, contact_type,  **kwargs):
+    def add_contact(self, contact_type, **kwargs):
         """Creates a contact from supplied dictionary params.
         Raises a CivicrmError if a required field is not supplied:
         contact_type and/or one of  first_name, last_name, 
         email, display_name. Returns a dictionary of the contact created.
         """
         required = ['first_name', 'last_name', 'email', 'display_name']
-        missing_fields =  matches_required(required, kwargs)
+        missing_fields = matches_required(required, kwargs)
         if missing_fields:
             raise CivicrmError('One of the following fields must exist:%s'
-                    % ", ".join(missing_fields))
+                               % ", ".join(missing_fields))
         return self.create('Contact', contact_type=contact_type, **kwargs)[0]
 
     def add_relationship(self, contact_a, contact_b, relationship, **kwargs):
@@ -444,7 +444,7 @@ class CiviCRM:
             'relationship_type_id': relationship_id,
             'contact_id_a': contact_a,
             'contact_id_b': contact_b
-                    })
+        })
         return self.create('Relationship', **kwargs)[0]
 
     def add_activity_type(self, label, weight=5, is_active=0, **kwargs):
@@ -457,13 +457,13 @@ class CiviCRM:
         """
         kwargs.update({
             'label': label,
-               'weight': weight,
+            'weight': weight,
             'is_active': is_active
-               })
+        })
         return self.create('ActivityType', **kwargs)[0]
 
     def add_activity(self, activity_type, sourceid,
-        subject=None, date_time=None, activity_status=None,
+                     subject=None, date_time=None, activity_status=None,
                      activity_medium=None, priority=None, **kwargs):
         """Creates an activity. 
         activity_type, activity_status, activity_medium and priority
@@ -485,10 +485,10 @@ class CiviCRM:
 
         if type(activity_type) is not int:
             activity_type = self.is_valid_option(
-                    'Activity', 'activity_type_id', activity_type)
+                'Activity', 'activity_type_id', activity_type)
         kwargs['activity_type_id'] = activity_type
         # get corresponding id
-        largs =  locals()
+        largs = locals()
         for option in ['activity_status', 'activity_medium', 'priority']:
             if largs[option]:
                 val = largs[option]
@@ -500,11 +500,11 @@ class CiviCRM:
             'source_contact_id': sourceid,
             'subject': subject,
             'activity_date_time': date_time
-            })
+        })
         return self.create('Activity', **kwargs)[0]
 
     def add_contribution(self, contact_id, total_amount,
-            financial_type, **kwargs):
+                         financial_type, **kwargs):
         """Add a contribution of amount credited to contact_id.
         financial_type can be an integer or a string corresponding to a 
         financial types id or value respectively. 
@@ -525,7 +525,7 @@ class CiviCRM:
         })
         return self.create('Contribution', **kwargs)[0]
 
-    def add_email(self, contact_id, email, email_like=False,  **kwargs):
+    def add_email(self, contact_id, email, email_like=False, **kwargs):
         """Add an email to civicrm. If email_like is True it checks 
         to see whether the supplied email looks something like a real email,
         using a typical handwavey regex (specifically  something like 
@@ -539,7 +539,7 @@ class CiviCRM:
         if email_like and not re.match(self.eml, email):
             raise CivicrmError("Might not be an email address")
         return self.create('Email', contact_id=contact_id, email=email,
-                **kwargs)[0]
+                           **kwargs)[0]
 
     def add_note(self, entity_id, note, **kwargs):
         """Add a note . Note if entity_table is not defined,
@@ -548,14 +548,14 @@ class CiviCRM:
         contact_id (note creator), modified_date and privacy."""
 
         return self.create('Note', entity_id=entity_id, note=note,
-                **kwargs)[0]
+                           **kwargs)[0]
 
     def add_tag(self, name, **kwargs):
         """Add a tag."""
         return self.create('Tag', name=name, **kwargs)[0]
 
     def add_entity_tag(self, entity_id, tag_id,
-                    entity_table="civicrm_contact"):
+                       entity_table="civicrm_contact"):
         """Tag an entity_id (a contact id by default) by tag id.
         Note returns a dict with "is_error,not_added, added, total_count
         It's not an error to tag an entity with a tag, it just won't
@@ -563,7 +563,7 @@ class CiviCRM:
         See also notes under delete."""
 
         return self.create('EntityTag', entity_id=entity_id,
-                tag_id=tag_id, entity_table=entity_table)
+                           tag_id=tag_id, entity_table=entity_table)
 
     def add_group(self, title, **kwargs):
         """Add a group to CiviCRM."""
@@ -586,7 +586,7 @@ class CiviCRM:
         as digits only (no spaces, dashes etc)."""
 
         return self.create('Phone', contact_id=contact_id,
-                phone=phone, **kwargs)[0]
+                           phone=phone, **kwargs)[0]
 
     def add_address(self, contact_id, location_type, **kwargs):
         """Add an address to civicrm. location_type can be supplied as 
