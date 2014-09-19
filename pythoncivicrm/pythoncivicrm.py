@@ -153,8 +153,8 @@ class CiviCRM:
         payload = self._construct_url_payload(action, entity, parameters)
         api_call = requests.get(self.url, params=payload, timeout=self.timeout)
         if api_call.status_code != 200:
-                raise CivicrmError('request to %s failed with status code %s'
-                                   % (self.url, api_call.status_code))
+            raise CivicrmError('request to %s failed with status code %s'
+                               % (self.url, api_call.status_code))
         results = json.loads(api_call.content)
         return self._check_results(results)
 
@@ -193,17 +193,10 @@ class CiviCRM:
             'json': 1,
             'entity': entity,
             'action': action
+            # rivimey: ?needed by AJAX api.
+            # 'fnName': "civicrm/%s/%s" % (entity, action)
         }
         return payload
-
-    # def _add_options(self, params, **kwargs):
-    #     """Adds limit and offset etc in form required by REST API
-    #     Takes key=value pairs and/or a dictionary(kwlist)
-    #     in addition to a parameter dictionary to extend."""
-    #         'action': action,
-    #         'fnName': "civicrm/%s/%s" % (entity, action)
-    #     }
-    #     return payload
 
     def _filter_merge_payload(self, parameters, payload, notparams):
         """Some parameters should be set explicitly, or not present,
@@ -371,7 +364,7 @@ class CiviCRM:
                 'id': db_id,
                 'field': field,
                 'value': value
-                }
+            }
         )
 
     def delete(self, entity, db_id, skip_undelete=False):
