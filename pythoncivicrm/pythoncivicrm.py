@@ -193,17 +193,10 @@ class CiviCRM:
             'json': 1,
             'entity': entity,
             'action': action
+            # rivimey: ?needed by AJAX api.
+            # 'fnName': "civicrm/%s/%s" % (entity, action)
         }
         return payload
-
-    # def _add_options(self, params, **kwargs):
-    # """Adds limit and offset etc in form required by REST API
-    #     Takes key=value pairs and/or a dictionary(kwlist)
-    #     in addition to a parameter dictionary to extend."""
-    #         'action': action,
-    #         'fnName': "civicrm/%s/%s" % (entity, action)
-    #     }
-    #     return payload
 
     def _filter_merge_payload(self, parameters, payload, notparams):
         """Some parameters should be set explicitly, or not present,
@@ -227,18 +220,42 @@ class CiviCRM:
         return payload
 
     def _construct_url_payload(self, action, entity, parameters):
-        """
-        Takes action, entity, parameters returns payload for the URL.
+        """Takes action, entity, parameters returns payload suitable for a URL.
+        body_html and body_text parameters are removed as being very likely
+        to exceed the maximum URL length limits. Use POST instead.
+
+        :param action: What to do with the payload '
+            - such as create, delete, getsingle etc.
+        :param entity: Which  CiviCRM module to reference.
+        :param parameters: An dictionary of key-value pairs to include
+            in the request.
+        :return: A dictionary of k-v pairs to send to the server
+            in the request.
         """
         payload = self._payload_template(action, entity)
-        # The body_X are here because they represent files which are likely to result
-        # in url too long errors.
-        notparams = ['site_key', 'api_key', 'entity', 'action', 'json', 'body_html', 'body_text']
+        notparams = [
+            'site_key',
+            'api_key',
+            'entity',
+            'action',
+            'json',
+            'body_html',
+            'body_text'
+            ]
         return self._filter_merge_payload(parameters, payload, notparams)
 
     def _construct_post_data(self, action, entity, parameters):
-        """From the parameters dictionary, return the POST data payload."""
+        """Takes action, entity, parameters returns a payload suitable
+        for a POST.
 
+        :param action: What to do with the payload
+            - such as create, delete, getsingle etc.
+        :param entity: Which  CiviCRM module to reference.
+        :param parameters: An dictionary of key-value pairs to include
+            in the request.
+        :return: A dictionary of k-v pairs to send to the server
+            in the request.
+        """
         payload = self._payload_template(action, entity)
         notparams = ['site_key', 'api_key', 'entity', 'action', 'json']
         return self._filter_merge_payload(parameters, payload, notparams)
