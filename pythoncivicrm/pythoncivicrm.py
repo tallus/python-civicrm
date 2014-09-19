@@ -1,5 +1,5 @@
 """
-.. module::pythoncivicrm
+.. module::pythoncivicrm 
 :synopis:Python module to access the CiviCRM v3 API.
 
 Python CiviCRM
@@ -7,7 +7,7 @@ Python CiviCRM
 
 This is a module for interacting with the CiviCRM REST API Version 3.
 
-It's use should be fairly straight forward, at least if you have basic
+It's use should be fairly straight forward, at least if you have basic 
 familiarity with the API documentation.
 
 Everything is implemented in the CiviCRM class. You need, at a minimum to pass
@@ -34,7 +34,7 @@ Usage example for a basic search::
     civicrm = CiviCRM(url, site_key, api_key)
 
     search_results = civicrm.get('Contact', city='Gotham City')
-    first_10_search_results = civicrm.get('Contact',
+    first_10_search_results = civicrm.get('Contact', 
             city='Gotham City', limit=10)
 
 It can be easier to construct a dict and feed them to methods using ** to
@@ -128,7 +128,7 @@ class CiviCRM:
     def __init__(self, url, site_key, api_key, use_ssl=True, timeout=None):
         """Set url,api keys, ssl usage, timeout"""
 
-        # strip http(s):// off url
+        # strip http(s):// off url 
         regex = re.compile('^https?://')
         # handwavey email regex
         self.eml = re.compile(
@@ -143,7 +143,7 @@ class CiviCRM:
             start = 'https://'
         else:
             start = 'http://'
-        self.url = "%s%s/extern/rest.php" % (start, self.urlstring)
+        self.url =  "%s%s/extern/rest.php" % (start, self.urlstring)
 
     def _get(self, action, entity, parameters=None):
         """Internal method to make api calls using GET."""
@@ -154,8 +154,8 @@ class CiviCRM:
         api_call = requests.get(self.url, params=payload, timeout=self.timeout)
         if api_call.status_code != 200:
                 raise CivicrmError('request to %s failed with status code %s'
-                                   % (self.url, api_call.status_code))
-        results = json.loads(api_call.content)
+                        % (self.url, api_call.status_code))
+        results =  json.loads(api_call.content)
         return self._check_results(results)
 
     def _post(self, action, entity, parameters=None):
@@ -168,8 +168,8 @@ class CiviCRM:
             self.url, data=postdata, timeout=self.timeout
         )
         if api_call.status_code != 200:
-            raise CivicrmError('request to %s failed with status code %s'
-                               % (self.url, api_call.status_code))
+                raise CivicrmError('request to %s failed with status code %s'
+                        % (self.url, api_call.status_code))
         results = json.loads(api_call.content)
         # Some entities return things in the values field
         # that don't conform to the normal use elsewhere
@@ -227,42 +227,18 @@ class CiviCRM:
         return payload
 
     def _construct_url_payload(self, action, entity, parameters):
-        """Takes action, entity, parameters returns payload suitable for a URL.
-        body_html and body_text parameters are removed as being very likely
-        to exceed the maximum URL length limits. Use POST instead.
-
-        :param action: What to do with the payload '
-            - such as create, delete, getsingle etc.
-        :param entity: Which  CiviCRM module to reference.
-        :param parameters: An dictionary of key-value pairs to include
-            in the request.
-        :return: A dictionary of k-v pairs to send to the server
-            in the request.
+        """
+        Takes action, entity, parameters returns payload for the URL.
         """
         payload = self._payload_template(action, entity)
-        notparams = [
-            'site_key',
-            'api_key',
-            'entity',
-            'action',
-            'json',
-            'body_html',
-            'body_text'
-            ]
+        # The body_X are here because they represent files which are likely to result
+        # in url too long errors.
+        notparams = ['site_key', 'api_key', 'entity', 'action', 'json', 'body_html', 'body_text']
         return self._filter_merge_payload(parameters, payload, notparams)
 
     def _construct_post_data(self, action, entity, parameters):
-        """Takes action, entity, parameters returns a payload suitable
-        for a POST.
+        """From the parameters dictionary, return the POST data payload."""
 
-        :param action: What to do with the payload
-            - such as create, delete, getsingle etc.
-        :param entity: Which  CiviCRM module to reference.
-        :param parameters: An dictionary of key-value pairs to include
-            in the request.
-        :return: A dictionary of k-v pairs to send to the server
-            in the request.
-        """
         payload = self._payload_template(action, entity)
         notparams = ['site_key', 'api_key', 'entity', 'action', 'json']
         return self._filter_merge_payload(parameters, payload, notparams)
@@ -299,10 +275,10 @@ class CiviCRM:
             options = self.getoptions(entity, field)
         except CivicrmError:
             raise CivicrmError("%s has no defined options for %s"
-                               % (entity, field))
+                    % (entity, field))
         # swap keys & values for lookup keys are labels
         labels = dict((value, key) for key, value
-                      in options.items())
+                in options.items())
         if type(value) is int and str(value) in options:
             return value
         elif value in labels:
@@ -328,7 +304,7 @@ class CiviCRM:
 
     def getsingle(self, entity, **kwargs):
         """Simple implementation of getsingle action.
-        Returns a dictionary.
+        Returns a dictionary. 
         Raises a CiviCRM  error if no or multiple results are found.
         """
         # TODO OPTIONS?
@@ -336,7 +312,7 @@ class CiviCRM:
 
     def getvalue(self, entity, returnfield, **kwargs):
         """Simple implementation of getvalue action.
-        Will only return one field as unicodestring
+        Will only return one field as unicodestring  
         and expects only one result, as per get single.
         Raises a CiviCRM  error if no or multiple results are found.
         """
@@ -360,7 +336,7 @@ class CiviCRM:
 
     def setvalue(self, entity, db_id, field, value):
         """Updates a single field. This is not well documented, use at own risk.
-        Takes an id and single field and value,
+        Takes an id and single field and value, 
         returns a dictionary with the updated field and record.
         """
         # TODO OPTIONS?
@@ -376,10 +352,10 @@ class CiviCRM:
 
     def delete(self, entity, db_id, skip_undelete=False):
         """Delete a record. Set skip_undelete to True, to permanently
-        delete a record for cases  where there is a 'recycle bin'
+        delete a record for cases  where there is a 'recycle bin' 
         e.g. contacts.
         In some cases, e.g. entity_tags entries entries can be deleted
-        without the id (get on entity tags doesn't return the id). In these
+        without the id (get on entity tags doesn't return the id). In these 
         cases use getaction with delete and the appropriate key-value pairs.
         Returns the number of deleted records.
         """
@@ -407,7 +383,7 @@ class CiviCRM:
         """Returns a dictionary of options for fields
         as key/value pairs. Typically identical to each other.
         (though sometimes appear to be synonyms? e.g. 1: Yes)
-        Raises CivicrmError if a field has no associated options
+        Raises CivicrmError if a field has no associated options 
         or is not present etc.
         """
         parameters = {'field': field, 'sequential': 0}
@@ -420,30 +396,30 @@ class CiviCRM:
         """
         return self._post(action, entity, kwargs)
 
-    def add_contact(self, contact_type, **kwargs):
+    def add_contact(self, contact_type,  **kwargs):
         """Creates a contact from supplied dictionary params.
         Raises a CivicrmError if a required field is not supplied:
-        contact_type and/or one of  first_name, last_name,
+        contact_type and/or one of  first_name, last_name, 
         email, display_name. Returns a dictionary of the contact created.
         """
         required = ['first_name', 'last_name', 'email', 'display_name']
-        missing_fields = matches_required(required, kwargs)
+        missing_fields =  matches_required(required, kwargs)
         if missing_fields:
             raise CivicrmError('One of the following fields must exist:%s'
-                               % ", ".join(missing_fields))
+                    % ", ".join(missing_fields))
         return self.create('Contact', contact_type=contact_type, **kwargs)[0]
 
     def add_relationship(self, contact_a, contact_b, relationship, **kwargs):
         """Adds a relationship between contact_a and contact_b.
         Contacts must be supplied as id's (int).
         If the relationship is supplied as an int it is assumend to be an id,
-        otherwise name_a_b, label_a_b, name_b_a, label_b_a  and description
-        are searched for a match.
-        A CivicrmError is raised if no match is found.
+        otherwise name_a_b, label_a_b, name_b_a, label_b_a  and description 
+        are searched for a match. 
+        A CivicrmError is raised if no match is found. 
         N.B. 'Alice', 'Bob', 'Employer of' means Bob is the employer of Alice.
         Non compulsory fields may be passed in a keyword pairs.
         Searching for a match will hit the API and may do so multiple times,
-        you may find it beneficial to check the result for
+        you may find it beneficial to check the result for 
         'relationship_type_id' and cache this result.
         Returns a dictionary of the contact created.
         """
@@ -468,12 +444,12 @@ class CiviCRM:
             'relationship_type_id': relationship_id,
             'contact_id_a': contact_a,
             'contact_id_b': contact_b
-        })
+                    })
         return self.create('Relationship', **kwargs)[0]
 
     def add_activity_type(self, label, weight=5, is_active=0, **kwargs):
         """Creates an Activity Type. Label is a string describing the activity
-        spaces are allowed.  Weight is any postive or negative integer. It
+        spaces are allowed.  Weight is any postive or negative integer. It 
         affects the order in which things are displayed in the web interface.
         It defaults to 5, this puts things just after the basic types such
         as Phone Call. is_active defaults to 0: disabled (as per CiviCRM.
@@ -481,38 +457,38 @@ class CiviCRM:
         """
         kwargs.update({
             'label': label,
-            'weight': weight,
+               'weight': weight,
             'is_active': is_active
-        })
+               })
         return self.create('ActivityType', **kwargs)[0]
 
     def add_activity(self, activity_type, sourceid,
-                     subject=None, date_time=None, activity_status=None,
+        subject=None, date_time=None, activity_status=None,
                      activity_medium=None, priority=None, **kwargs):
-        """Creates an activity.
+        """Creates an activity. 
         activity_type, activity_status, activity_medium and priority
-        can all be supplied as a label or id (int). The label
+        can all be supplied as a label or id (int). The label 
         wil be automatically coverted into the corresponding id
-        so activity_type becomes  activity_type_id. Valid values
-        can be obtained with  the getoptions method e.g.
+        so activity_type becomes  activity_type_id. Valid values 
+        can be obtained with  the getoptions method e.g. 
         getoptions('Activity', 'status_id')
-        (This method doesn't take activity_type_name
+        (This method doesn't take activity_type_name  
         -- its identical for predefined types.
         use  the create method  if you insist on using it).
         sourceid is an int, typically the contact_id for
         the person creating the activity, loosely defined.
         There is also a target_contact_id for person contacted etc.
-        Subject is a string, typically a summary of the activity.
-        date_time should be string not a datetime object.
+        Subject is a string, typically a summary of the activity. 
+        date_time should be string not a datetime object. 
         It's short hand for 'activity_date_time'.
         """
 
         if type(activity_type) is not int:
             activity_type = self.is_valid_option(
-                'Activity', 'activity_type_id', activity_type)
+                    'Activity', 'activity_type_id', activity_type)
         kwargs['activity_type_id'] = activity_type
         # get corresponding id
-        largs = locals()
+        largs =  locals()
         for option in ['activity_status', 'activity_medium', 'priority']:
             if largs[option]:
                 val = largs[option]
@@ -524,14 +500,14 @@ class CiviCRM:
             'source_contact_id': sourceid,
             'subject': subject,
             'activity_date_time': date_time
-        })
+            })
         return self.create('Activity', **kwargs)[0]
 
     def add_contribution(self, contact_id, total_amount,
-                         financial_type, **kwargs):
+            financial_type, **kwargs):
         """Add a contribution of amount credited to contact_id.
-        financial_type can be an integer or a string corresponding to a
-        financial types id or value respectively.
+        financial_type can be an integer or a string corresponding to a 
+        financial types id or value respectively. 
         This can be obtained with
         self.getoptions('Contribution', 'financial_type_id').
         """
@@ -549,37 +525,37 @@ class CiviCRM:
         })
         return self.create('Contribution', **kwargs)[0]
 
-    def add_email(self, contact_id, email, email_like=False, **kwargs):
-        """Add an email to civicrm. If email_like is True it checks
+    def add_email(self, contact_id, email, email_like=False,  **kwargs):
+        """Add an email to civicrm. If email_like is True it checks 
         to see whether the supplied email looks something like a real email,
-        using a typical handwavey regex (specifically  something like
-        something@something.something so local emails will fail).
+        using a typical handwavey regex (specifically  something like 
+        something@something.something so local emails will fail). 
         A CivicrmError is raised if it fails this "test".
-        No claim is made that this actually is or isn't a valid email,
-        never mind that you can actually send email to it.
+        No claim is made that this actually is or isn't a valid email, 
+        never mind that you can actually send email to it. 
         Civicrm doesn't care and will take anything in the field apparently.
         """
 
         if email_like and not re.match(self.eml, email):
             raise CivicrmError("Might not be an email address")
         return self.create('Email', contact_id=contact_id, email=email,
-                           **kwargs)[0]
+                **kwargs)[0]
 
     def add_note(self, entity_id, note, **kwargs):
         """Add a note . Note if entity_table is not defined,
-        it defaults to civicrm_contact. entity_table refers to the
-        table name in civicrm database. Other fields are  subject
+        it defaults to civicrm_contact. entity_table refers to the 
+        table name in civicrm database. Other fields are  subject 
         contact_id (note creator), modified_date and privacy."""
 
         return self.create('Note', entity_id=entity_id, note=note,
-                           **kwargs)[0]
+                **kwargs)[0]
 
     def add_tag(self, name, **kwargs):
         """Add a tag."""
         return self.create('Tag', name=name, **kwargs)[0]
 
     def add_entity_tag(self, entity_id, tag_id,
-                       entity_table="civicrm_contact"):
+                    entity_table="civicrm_contact"):
         """Tag an entity_id (a contact id by default) by tag id.
         Note returns a dict with "is_error,not_added, added, total_count
         It's not an error to tag an entity with a tag, it just won't
@@ -587,7 +563,7 @@ class CiviCRM:
         See also notes under delete."""
 
         return self.create('EntityTag', entity_id=entity_id,
-                           tag_id=tag_id, entity_table=entity_table)
+                tag_id=tag_id, entity_table=entity_table)
 
     def add_group(self, title, **kwargs):
         """Add a group to CiviCRM."""
@@ -610,10 +586,10 @@ class CiviCRM:
         as digits only (no spaces, dashes etc)."""
 
         return self.create('Phone', contact_id=contact_id,
-                           phone=phone, **kwargs)[0]
+                phone=phone, **kwargs)[0]
 
     def add_address(self, contact_id, location_type, **kwargs):
-        """Add an address to civicrm. location_type can be supplied as
+        """Add an address to civicrm. location_type can be supplied as 
         numeric id or its equivalent value.
         """
         if type(location_type) is not int:
