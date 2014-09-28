@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='pythoncivicrm',
-    version='1.0',
+    version='0.2',
     install_requires=[
         "requests",
     ],
