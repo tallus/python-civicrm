@@ -22,6 +22,9 @@ with how things are returned. See :ref:`things-to-note`.
 
 A CivicrmError will be raised for anything other than a 200 respose e.g. 404
 
+**Documentation can be found at: http://python-civicrm.readthedocs.org/**
+
+
 Usage
 -----
 Use example for a basic search::
@@ -52,6 +55,8 @@ e.g.
     civicrm = CiviCRM(url, site_key, api_key, timeout=5)
 
     Connections will timeout after 5 seconds, and raise an error.
+
+
 Things to note
 --------------
 
