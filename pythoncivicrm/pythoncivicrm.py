@@ -150,7 +150,7 @@ class CiviCRM:
 
         if not parameters:
             parameters = {}
-        payload = self._construct_url_payload(action, entity, parameters)
+        payload = self._construct_payload('get', action, entity, parameters)
         api_call = requests.get(self.url, params=payload, timeout=self.timeout)
         if api_call.status_code != 200:
             raise CivicrmError('request to %s failed with status code %s'
@@ -163,7 +163,7 @@ class CiviCRM:
 
         if not parameters:
             parameters = {}
-        postdata = self._construct_post_data(action, entity, parameters)
+        postdata = self._construct_payload('post', action, entity, parameters)
         api_call = requests.post(
             self.url, data=postdata, timeout=self.timeout
         )
@@ -193,8 +193,6 @@ class CiviCRM:
             'json': 1,
             'entity': entity,
             'action': action
-            # rivimey: ?needed by AJAX api.
-            # 'fnName': "civicrm/%s/%s" % (entity, action)
         }
         return payload
 
@@ -219,11 +217,13 @@ class CiviCRM:
             payload['sequential'] = 1
         return payload
 
-    def _construct_url_payload(self, action, entity, parameters):
+    def _construct_payload(self, use, action, entity, parameters):
         """Takes action, entity, parameters returns payload suitable for a URL.
         body_html and body_text parameters are removed as being very likely
         to exceed the maximum URL length limits. Use POST instead.
 
+        : use: Http method to use ['get, 'post', 'put', 'delete'] only get and
+        post are used here.
         :param action: What to do with the payload '
             - such as create, delete, getsingle etc.
         :param entity: Which  CiviCRM module to reference.
@@ -242,23 +242,10 @@ class CiviCRM:
             'body_html',
             'body_text'
             ]
+        if use.lower() == 'post':
+            notparams.extend(['body_html', 'body_text'])
         return self._filter_merge_payload(parameters, payload, notparams)
 
-    def _construct_post_data(self, action, entity, parameters):
-        """Takes action, entity, parameters returns a payload suitable
-        for a POST.
-
-        :param action: What to do with the payload
-            - such as create, delete, getsingle etc.
-        :param entity: Which  CiviCRM module to reference.
-        :param parameters: An dictionary of key-value pairs to include
-            in the request.
-        :return: A dictionary of k-v pairs to send to the server
-            in the request.
-        """
-        payload = self._payload_template(action, entity)
-        notparams = ['site_key', 'api_key', 'entity', 'action', 'json']
-        return self._filter_merge_payload(parameters, payload, notparams)
 
     def _add_options(self, params, **kwargs):
         """Adds limit and offset etc. keys in form required by REST API
@@ -528,7 +515,6 @@ class CiviCRM:
         This can be obtained with
         self.getoptions('Contribution', 'financial_type_id').
         """
-
         if type(financial_type) is not int:
             financial_type = self.is_valid_option(
                 'Contribution',
@@ -574,9 +560,9 @@ class CiviCRM:
     def add_entity_tag(self, entity_id, tag_id,
                        entity_table="civicrm_contact"):
         """Tag an entity_id (a contact id by default) by tag id.
-        Note returns a dict with "is_error,not_added, added, total_count
-        It's not an error to tag an entity with a tag, it just won't
-        get added Iand added and not_added will reflect this.
+        Note returns a dict with "is_error, not_added, added, total_count
+        It's not an error to tag an entity with an invalid tag, it just won't
+        get added, and added and not_added will reflect this.
         See also notes under delete."""
 
         return self.create('EntityTag', entity_id=entity_id,

@@ -73,5 +73,6 @@ to feed them a dict and expand it with the ** notatation like so:
 * The CiviCRM API typically returns JSON (that would decode to a dictionary) with the actual results you want stored in values(or result if a single value is expected). Additional info is typically API version and count. If results are returned successfully we only return the results themselves -- typically a list of dictionaries, as this API version is always 3 with this module, and count can easily be derived using len().
 * Returned values are generally sequential (i.e. a list (of dictionaries) rather than a dictionary (of dictionaries) with numbers for keys) except in the case of getfields & getoptions that return  a dictionary with real keys.
 * Results are unicode
-* the  replace API call is undocumented ,AFAIK, so not implemented, use getaction if you must.
-
+* The  replace API call is undocumented, AFAIK, so not implemented, use getaction if you must.
+* Mock is required to run the unit-tests, however it is not listed in requirements.txt, you will need to install it yourself with pip install mock on Python 2.7 or use pip install -r requirements-dev.txt (it is part of the standard library with recent releases of Python 3).
+* There are also integration tests which should be run against a clean install of Civicrm with the sample data loaded. You will need to create a file called config.py in tests with IP_ADDR etc set correctly as per your installation. N.B. Do not run these against a production server.
