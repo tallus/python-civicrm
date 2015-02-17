@@ -9,7 +9,8 @@ class MyTests(unittest.TestCase):
         # pylint: disable=R0904
 
     def setUp(self):
-        ip = '192.168.56.101' # was '192.168.1.124'
+        #ip = '192.168.56.101' # was '192.168.1.124'
+        ip = '192.168.1.107'
         url = "%s/drupal7/sites/all/modules/civicrm/" % ip
         site_key = '371cfadc834d2784a35e4f4ab20c1316'
         api_key = 'b734df56706432bb514ed737465424c3'
@@ -31,14 +32,14 @@ class MyTests(unittest.TestCase):
         results = self.cc._add_options({}, limit=1)
         self.assertEquals(len(results), 1)
 
-    def test__construct_url_payload(self):
-        payload = self.cc._construct_url_payload('get', 'Contact',
+    def test__construct_payload_get(self):
+        payload = self.cc._construct_payload('get', 'get', 'Contact',
                 {'json' : 0, 'contact_id': 2})
         self.assertEquals(payload['json'], 1)
         self.assertEquals(payload['contact_id'], 2)
 
-    def test__construct_post_data(self):
-        payload = self.cc._construct_post_data('post', 'Contact',
+    def test__construct_payload_post(self):
+        payload = self.cc._construct_payload('post', 'create', 'Contact',
                 {'json' : 0, 'contact_id': 2})
         self.assertEquals(payload['json'], 1)
         self.assertEquals(payload['contact_id'], 2)
