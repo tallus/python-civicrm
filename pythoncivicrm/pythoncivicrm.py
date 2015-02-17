@@ -193,8 +193,6 @@ class CiviCRM:
             'json': 1,
             'entity': entity,
             'action': action
-            # rivimey: ?needed by AJAX api.
-            # 'fnName': "civicrm/%s/%s" % (entity, action)
         }
         return payload
 
@@ -244,7 +242,7 @@ class CiviCRM:
             'body_html',
             'body_text'
             ]
-        if not use.lower() == 'get':
+        if use.lower() == 'post':
             notparams.extend(['body_html', 'body_text'])
         return self._filter_merge_payload(parameters, payload, notparams)
 
@@ -517,7 +515,6 @@ class CiviCRM:
         This can be obtained with
         self.getoptions('Contribution', 'financial_type_id').
         """
-
         if type(financial_type) is not int:
             financial_type = self.is_valid_option(
                 'Contribution',
@@ -563,9 +560,9 @@ class CiviCRM:
     def add_entity_tag(self, entity_id, tag_id,
                        entity_table="civicrm_contact"):
         """Tag an entity_id (a contact id by default) by tag id.
-        Note returns a dict with "is_error,not_added, added, total_count
-        It's not an error to tag an entity with a tag, it just won't
-        get added Iand added and not_added will reflect this.
+        Note returns a dict with "is_error, not_added, added, total_count
+        It's not an error to tag an entity with an invalid tag, it just won't
+        get added, and added and not_added will reflect this.
         See also notes under delete."""
 
         return self.create('EntityTag', entity_id=entity_id,
